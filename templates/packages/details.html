@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load cache %}
+
+{% block title %}Arch Linux - {{ pkg.pkgname }} {{ pkg.full_version }} - Package Details{% endblock %}
+{% block navbarclass %}anb-packages{% endblock %}
+
+{% load package_extras %}
+{% block content %}
+<div id="pkgdetails" class="box">
+
+    <h2>Package Details: {{ pkg.pkgname }} {{ pkg.full_version }}</h2>
+
+    <div id="detailslinks" class="listing">
+
+        <div id="actionlist">
+        <h4>Package Actions</h4>
+            <ul class="small">
+                <li><a href="{% svn_arch pkg %}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.arch}} branch">SVN Entries ({{pkg.repo|lower}}-{{pkg.arch}})</a></li>
+                <li><a href="{% svn_trunk pkg %}" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>
+                <li><a href="{% bugs_list pkg %}" title="View existing bug tickets for {{ pkg.pkgname }}">Bug Reports</a></li>
+                <li><a href="{% bug_report pkg %}" title="Report bug for {{ pkg.pkgname }}">Report a Bug</a></li>
+                {% if pkg.flag_date %}
+                <li><span class="flagged">Flagged out-of-date on {{ pkg.flag_date|date }}</span></li>
+                {% with pkg.in_testing as tp %}{% if tp %}
+                <li><span class="flagged">Version
+                    <a href="{{ tp.get_absolute_url }}"
+                        title="Testing package details for {{ tp.pkgname }}">{{ tp.full_version }}</a>
+                    in testing</span></li>
+                {% endif %}{% endwith %}
+                {% if perms.main.change_package %}
+                <li><a href="unflag/" title="Unflag this package">Click here to unflag</a></li>
+                <li><a href="unflag/all/" title="Unflag all matching pkgbase">Click here to unflag all split packages</a></li>
+                {% endif %}
+                {% else %}
+                <li><a href="flag/" title="Flag {{ pkg.pkgname }} as out-of-date">Flag Package Out-of-Date</a>
+                <a href="/packages/flaghelp/"
+                    title="Get help on package flagging"
+                    onclick="return !window.open('/packages/flaghelp/','FlagHelp',
+                    'height=350,width=450,location=no,scrollbars=yes,menubars=no,toolbars=no,resizable=no');">(?)</a></li>
+                {% endif %}
+                <li><a href="download/" rel="nofollow" title="Download {{ pkg.pkgname }} from mirror">Download From Mirror</a></li>
+            </ul>
+
+            {% if perms.main.change_package %}
+            <form id="pkg-action" method="post" action="/packages/update/">{% csrf_token %}
+                <div><input type="hidden" name="pkgid" value="{{ pkg.id }}" /></div>
+                <p>{% if user in pkg.maintainers %}
+                    <input title="Orphan this package" type="submit" name="disown" value="Disown"/>
+                    {% else %}
+                    <input title="Adopt this package" type="submit" name="adopt" value="Adopt"/>
+                 {% endif %}</p>
+            </form>
+            {% endif %}
+        </div>
+
+        {% with pkg.elsewhere as others %}{% if others %}
+        <div id="elsewhere" class="widget">
+            <h4>Versions Elsewhere</h4>
+            <ul>
+                {% for o in others %}
+                <li><a href="{{ o.get_absolute_url }}"
+                    title="Package details for {{ o.pkgname }}">{{ o.pkgname }} {{ o.full_version }} [{{ o.repo.name|lower }}] ({{ o.arch.name }})</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}{% endwith %}
+
+    </div><!-- #actionlist -->
+
+    {% cache 300 package-details-pkginfo pkg.id %}
+    <table id="pkginfo">
+        <tr>
+            <th>Architecture:</th>
+            <td><a href="/packages/?arch={{ pkg.arch.name }}"
+                    title="Browse packages for {{ pkg.arch.name }} architecture">{{ pkg.arch.name }}</a></td>
+        </tr><tr>
+            <th>Repository:</th>
+            <td><a href="/packages/?repo={{ pkg.repo.name|capfirst }}"
+                    title="Browse the {{ pkg.repo.name|capfirst }} repository">{{ pkg.repo.name|capfirst }}</a></td>
+        </tr>
+        {% ifequal pkg.pkgname pkg.pkgbase %}
+        {% with pkg.split_packages as splits %}{% if splits %}
+        <tr>
+            <th>Split Packages:</th>
+            <td>
+                {% for s in splits %}
+                <a href="{{ s.get_absolute_url }}"
+                    title="Package details for {{ s.pkgname }}">{{ s.pkgname }}</a><br/>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endif %}{% endwith %}
+        {% else %}
+        <tr>
+            <th>Base Package:</th>
+            {% if pkg.base_package %}
+            <td><a href="{{ pkg.base_package.get_absolute_url }}"
+                    title="Package details for {{ pkg.base_package.pkgname }}">{{ pkg.pkgbase }}</a></td>
+            {% else %}
+            <td><a href="../{{ pkg.pkgbase }}/"
+                    title="Split package details for {{ pkg.pkgbase }}">{{ pkg.pkgbase }}</a></td>
+            {% endif %}
+        </tr>
+        {% endifequal %}
+        <tr>
+            <th>Description:</th>
+            <td class="wrap">{{ pkg.pkgdesc|default:"" }}</td>
+        </tr><tr>
+            <th>Upstream URL:</th>
+            <td>{% if pkg.url %}<a href="{{ pkg.url }}"
+                    title="Visit the website for {{ pkg.pkgname }}">{{ pkg.url }}</a>{% endif %}</td>
+        </tr><tr>
+            <th>License(s):</th>
+            <td>{{ pkg.licenses.all|join:", " }}</td>
+        </tr><tr>
+            <th>Groups:</th>
+            {% with pkg.groups.all as groups %}
+            <td>{% if groups %}
+                {% for g in groups %}
+                <a href="/groups/{{ pkg.arch.name }}/{{ g.name }}/"
+                    title="Group details for {{ g.name }}">{{ g.name }}</a><br/>
+                {% endfor %}
+                {% else %}None{% endif %}
+            </td>
+            {% endwith %}
+         </tr><tr>
+            <th>Maintainers:</th>
+            {% with pkg.maintainers as maints %}
+            <td>{% if maints %}
+                {% for m in maints %}
+                {% userpkgs m %}<br/>
+                {% endfor %}
+                {% else %}Orphan{% endif %}
+            </td>
+            {% endwith %}
+        </tr><tr>
+            <th>Package Size:</th>
+            <td>{{ pkg.compressed_size|filesizeformat }}</td>
+        </tr><tr>
+            <th>Installed Size:</th>
+            <td>{{ pkg.installed_size|filesizeformat }}</td>
+        </tr><tr>
+            <th>Last Packager:</th>
+            <td>{% with pkg.packager as pkgr %}{% if pkgr %}{% userpkgs pkgr %}{% else %}{{ pkg.packager_str }}{% endif %}{% endwith %}</td>
+        </tr><tr>
+            <th>Build Date:</th>
+            <td>{{ pkg.build_date|date:"DATETIME_FORMAT" }} UTC</td>
+        </tr><tr>
+            <th>Last Updated:</th>
+            <td>{{ pkg.last_update|date }}</td>
+        </tr>
+    </table>
+
+    <div id="metadata">
+
+        {% with pkg.get_depends as deps %}
+        <div id="pkgdeps" class="listing">
+
+            <h3 title="{{ pkg.pkgname }} has the following dependencies">
+                Dependencies ({{deps|length}})</h3>
+
+            {% if deps %}
+            <ul>
+                {% for depend in deps %}
+                {% ifequal depend.pkg None %}
+                <li>{{ depend.dep.depname }} <span class="virtual-dep">(virtual)</span></li>
+                {% else %}
+                <li><a href="{{ depend.pkg.get_absolute_url }}"
+                    title="View package details for {{ depend.dep.depname }}">{{ depend.dep.depname }}</a>{{ depend.dep.depvcmp|default:"" }}
+                {% if depend.pkg.repo.testing %}<span class="testing-dep">(testing)</span>{% endif %}
+                {% if depend.dep.optional %}<span class="opt-dep">(optional)</span>{% endif %}
+                {% if depend.dep.description %}- <span class="dep-desc">{{ depend.dep.description }}</span>{% endif %}
+                </li>
+                {% endifequal %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div><!-- #pkgdeps -->
+        {% endwith %}
+
+        {% with pkg.get_requiredby as rqdby %}
+        <div id="pkgreqs" class="listing">
+
+            <h3 title="Packages that require {{ pkg.pkgname }}">
+                Required By ({{rqdby|length}})</h3>
+
+            {% if rqdby %}
+            <ul>
+                {% for req in rqdby %}
+                <li><a href="{{ req.pkg.get_absolute_url }}"
+                    title="View package details for {{ req.pkg.pkgname }}">{{ req.pkg.pkgname }}</a>
+                {% if req.pkg.repo.testing %}<span class="testing-dep">(testing)</span>{% endif %}
+                {% if req.optional %}<span class="opt-dep">(optional)</span>{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div><!-- #pkgreqs -->
+        {% endwith %}
+
+        <div id="pkgfiles" class="listing">
+
+            <h3 title="Complete list of files contained within this package">
+                Package Contents</h3>
+
+            <div id="pkgfilelist">
+                <p><a id="filelink" href="files/"
+                    title="Click to view the complete file list for {{ pkg.pkgname }}">
+                    View the file list for {{ pkg.pkgname }}</a></p>
+            </div>
+
+        </div><!-- #pkgfiles -->
+
+    </div><!-- #metadata -->
+    {% endcache %}
+
+</div><!-- #pkgdetails -->
+
+{% load cdn %}{% jquery %}
+<script type="text/javascript" src="/media/archweb.js"></script>
+<script type="text/javascript">
+$(document).ready(ajaxifyFiles);
+</script>
+{% endblock %}

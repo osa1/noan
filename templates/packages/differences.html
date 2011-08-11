@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Arch Linux - Package Differences by Architecture{% endblock %}
+{% block navbarclass %}anb-packages{% endblock %}
+
+{% block content %}
+{% if differences %}
+<div id="differences-filter" class="box filter-criteria">
+    <h2>Package Differences by Architecture</h2>
+    <h3>Filter Differences View</h3>
+    <form id="diff_filter" method="post" action=".">
+    <fieldset>
+        <legend>Select filter criteria</legend>
+        <div><label for="id_archonly" title="Limit packages to selected architecture">Architecture Limitation</label>
+            <select name="archonly" id="id_archonly">
+                <option value="all">Show All</option>
+                <option value="both" selected="selected">Only In Both</option>
+                <option value="{{ arch_a.name }}">In {{ arch_a.name }} Only</option>
+                <option value="{{ arch_b.name }}">In {{ arch_b.name }} Only</option>
+            </select>
+        </div>
+        <div><label for="id_multilib" title="Show multilib packages"><tt>[multilib]</tt> Visible</label>
+            <input type="checkbox" name="multilib" id="id_multilib" value="multilib"/></div>
+        <div><label for="id_minor" title="Show minor version mismatches">Minor Version Mismatches</label>
+            <input type="checkbox" name="minor" id="id_minor" value="minor"/></div>
+        <div ><label>&nbsp;</label><input title="Reset search criteria" type="button" id="criteria_reset" value="Reset"/></div>
+    </fieldset>
+    </form>
+</div>
+
+<div class="box">
+    <table class="results">
+        <thead>
+            <tr>
+                <th>Package Name</th>
+                <th>Repository</th>
+                <th>{{ arch_a.name }} Version</th>
+                <th>{{ arch_b.name }} Version</th>
+            </tr>
+        </thead>
+        <tbody id="tbody_differences">
+            {% for diff in differences %}
+            <tr class="{% cycle 'odd' 'even' %} {{ diff.classes }}">
+                <td>{{ diff.pkgname }}</td>
+                <td>{{ diff.repo.name }}</td>
+                {% if diff.pkg_a %}
+                <td><a href="{{ diff.pkg_a.get_absolute_url }}"
+                        title="View package details for {{ diff.pkg_a.pkgname }}">
+                        <span{% if diff.pkg_a.flag_date %} class="flagged"{% endif %}>{{ diff.pkg_a.full_version }}</span></a></td>
+                {% else %}<td>-</td>{% endif %}
+                {% if diff.pkg_b %}
+                <td><a href="{{ diff.pkg_b.get_absolute_url }}"
+                        title="View package details for {{ diff.pkg_b.pkgname }}">
+                        <span{% if diff.pkg_b.flag_date %} class="flagged"{% endif %}>{{ diff.pkg_b.full_version }}</span></a></td>
+                {% else %}<td>-</td>{% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% load cdn %}{% jquery %}
+<script type="text/javascript" src="/media/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/media/archweb.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.results').tablesorter({widgets: ['zebra'], sortList: [[1,0], [0,0]]});
+    $('#diff_filter select').change(filter_packages);
+    $('#diff_filter input').change(filter_packages);
+    $('#criteria_reset').click(filter_reset);
+    // fire function on page load to ensure the current form selections take effect
+    filter_packages();
+});
+</script>
+{% endif %}
+{% endblock %}

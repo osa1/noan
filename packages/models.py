@@ -1,11 +1,12 @@
 # TODO CharField max_length ara degerleri
+# TODO source.packager.name gibi bir kisayol ara.
 
 from django.db import models
 from django.contrib.auth.models import User
 
 class Package(models.Model):
     name = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateField('date published')
     isA = models.ManyToManyField('isA')
     partOf = models.ForeignKey('partOf', related_name='packages')
     license = models.ManyToManyField('License', related_name='packages')
@@ -19,7 +20,6 @@ class Package(models.Model):
     # source_name = models.CharField(max_length=255)
     homepage = models.URLField()
     packager = models.ForeignKey(User)
-
 
 
     def __unicode__(self):
@@ -55,7 +55,7 @@ class OneToMany(models.Model):
     name = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return str(type(self)) + "(%s)" % self.name
+        return "%s" % self.name
 
     class Meta:
         abstract = True
