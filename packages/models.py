@@ -20,11 +20,15 @@ class Package(models.Model):
     # source_name = models.CharField(max_length=255)
     homepage = models.URLField()
     packager = models.ForeignKey(User)
+    dependencies = models.ManyToManyField('self', symmetrical=False)
 
     @property
     def last_packager(self):
         packager = Update.objects.filter(package=self)[0].packager.username
         return packager if packager else self.packager.username
+
+    def last_update(self):
+        return Update.objects.filter(package=self)[0].date
 
     @property
     def pkgdesc(self):
@@ -75,12 +79,16 @@ class Package(models.Model):
     def __unicode__(self):
         return self.name
 
+class Dependency(models.Model):
+    pass
+
 class Update(models.Model):
     release = models.IntegerField()
     version = models.CharField(max_length=256)
-    comment = models.CharField(max_length=256)
+    comment = models.TextField()
     packager = models.ForeignKey(User)
     package = models.ForeignKey(Package)
+    date = models.DateField()
 
     def __unicode__(self):
         return "%s_%s" % (self.release, self.version)
