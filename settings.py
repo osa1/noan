@@ -1,4 +1,5 @@
 # Django settings for packages_pardus project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -6,6 +7,8 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+
+DEPLOY_PATH = os.path.dirname(os.path.realpath(__file__))
 
 MANAGERS = ADMINS
 
@@ -88,7 +91,7 @@ SECRET_KEY = 'u3(+ysh!$j*f0ka7m$lh#t73@ff0@(ug110-t%xhb#ip3h@mie'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -105,6 +108,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    "%s/templates" % DEPLOY_PATH,
 )
 
 INSTALLED_APPS = (

@@ -21,6 +21,56 @@ class Package(models.Model):
     homepage = models.URLField()
     packager = models.ForeignKey(User)
 
+    @property
+    def last_packager(self):
+        packager = Update.objects.filter(package=self)[0].packager.username
+        return packager if packager else self.packager.username
+
+    @property
+    def pkgdesc(self):
+        return Description.objects.filter(package=self).get(lang="en")
+
+    @property
+    def pkgname(self):
+        return self.name
+
+    @property
+    def groups(self):
+        return self.partOf
+
+    @property
+    def maintainer(self):
+        return self.packager
+
+    @property
+    def pkgbase(self):
+        return self.name
+
+    @property
+    def licenses(self):
+        return [license.name for license in self.license.all()]
+
+    @property
+    def url(self):
+        return self.homepage
+
+    @property
+    def full_version(self):
+        return ""
+
+    @property
+    def repo(self):
+        return "%s_%s" % (self.distribution, self.architecture)
+
+    @property
+    def arch(self):
+        return self.architecture
+
+    @property
+    def flag_date(self):
+        return ""
+
+
 
     def __unicode__(self):
         return self.name

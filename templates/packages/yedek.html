@@ -26,8 +26,7 @@
             <th>Architecture:</th>
             <td><a href="/packages/?arch={{ pkg.arch.name }}"
                     title="Browse packages for {{ pkg.arch.name }} architecture">{{ pkg.arch.name }}</a></td>
-        </tr>
-        <tr>
+        </tr><tr>
             <th>Repository:</th>
             <td><a href="/packages/?repo={{ pkg.repo|capfirst }}"
                     title="Browse the {{ pkg.repo|capfirst }} repository">{{ pkg.repo|capfirst }}</a></td>
@@ -35,17 +34,14 @@
         <tr>
             <th>Description:</th>
             <td class="wrap">{{ pkg.pkgdesc|default:"" }}</td>
-        </tr>
-        <tr>
+        </tr><tr>
             <th>Upstream URL:</th>
             <td>{% if pkg.url %}<a href="{{ pkg.url }}"
                     title="Visit the website for {{ pkg.pkgname }}">{{ pkg.url }}</a>{% endif %}</td>
-        </tr>
-        <tr>
+        </tr><tr>
             <th>License(s):</th>
             <td>{{ pkg.licenses|join:", " }}</td>
-        </tr>
-        <tr>
+        </tr><tr>
             <th>Groups:</th>
             {% with pkg.groups as groups %}
             <td>{% if groups %}
@@ -67,15 +63,14 @@
             <td>{{ pkg.installed_size|filesizeformat }}</td>
         </tr><tr>
             <th>Last Packager:</th>
-            <td>{{ pkg.last_packager }}</td>
+            <td>last packager</td>
         </tr><tr>
             <th>Build Date:</th>
-            <td> UTC</td>
+            <td>{{ pkg.pub_date|date:"DATETIME_FORMAT" }} UTC</td>
         </tr><tr>
             <th>Last Updated:</th>
             <td>last update</td>
         </tr>
-
     </table>
 
     <div id="metadata">
