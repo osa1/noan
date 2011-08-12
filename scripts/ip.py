@@ -2,6 +2,7 @@ import urllib2
 import os
 import pisi
 import time
+import piksemel
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -33,9 +34,8 @@ def urlretrieve(urlfile, fpath):
 if not os.path.exists(fpath):
     urlretrieve(urllib2.urlopen(base), fpath)
 
-xmldata = loadUrlData(base)
 pisi_index = pisi.index.Index()
-pisi_index.decode(xmldata, [])
+pisi_index.decode(piksemel.parseString(open(fpath, 'r').read()), [])
 
 def createAttr(model, attrList):
     for attr in attrList:
@@ -46,7 +46,11 @@ def createAttr(model, attrList):
             print attr
 
 
+max_packs = 10  # number of packages to import for testing
 for package in pisi_index.packages:
+    max_packs -= 1
+    if max_packs == 0:
+        break
     allAttr = ('isA', 'partOf', 'license', 'buildHost', 'distribution', 'architecture', 'packager')
     modelList = (isA, partOf, License, BuildHost, Distribution, Architecture, User)
     for model, attribute in zip(modelList, allAttr):
@@ -115,7 +119,8 @@ for package in pisi_index.packages:
         u = Update(version=update.version, release=update.release,
                 comment=update.comment,
                 packager=user,
-                package=p)
+                package=p,
+                date=update.date)
         u.save()
 
 # Second pass for dependencies
