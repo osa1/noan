@@ -43,14 +43,13 @@ def createAttr(model, attrList):
             model.objects.get(name = attr)
         except ObjectDoesNotExist:
             model(name=attr).save()
-            print attr
 
 
-max_packs = 10  # number of packages to import for testing
+#max_packs = 10  # number of packages to import for testing
 for package in pisi_index.packages:
-    max_packs -= 1
-    if max_packs == 0:
-        break
+    #max_packs -= 1
+    #if max_packs == 0:
+        #break
     allAttr = ('isA', 'partOf', 'license', 'buildHost', 'distribution', 'architecture', 'packager')
     modelList = (isA, partOf, License, BuildHost, Distribution, Architecture, User)
     for model, attribute in zip(modelList, allAttr):
@@ -123,11 +122,14 @@ for package in pisi_index.packages:
                 date=update.date)
         u.save()
 
+    print package.name, "added"
+
 # Second pass for dependencies
 for package in pisi_index.packages:
-    p = Package.objects.get(name=package.name)
+    pack = Package.objects.get(name=package.name)
+    print "adding deps of", pack.name
     _deps = [Package.objects.get(name=p.package) for p in package.runtimeDependencies()]
     for dep in _deps:
-        p.dependencies.add(dep)
+        pack.dependencies.add(dep)
 
 print time.time()-t
