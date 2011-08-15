@@ -4,6 +4,8 @@ from django.contrib.admin.widgets import AdminDateWidget
 from packages.models import Package, Description, Architecture, Distribution
 from django.contrib.auth.models import User
 
+from datetime import datetime
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404, redirect, render_to_response
 
@@ -55,6 +57,7 @@ class LimitTypedChoiceField(forms.TypedChoiceField):
         except (ValueError, TypeError):
             return False
 
+
 class PackageSearchForm(forms.Form):
     repo = forms.MultipleChoiceField(required=False)
     arch = forms.MultipleChoiceField(required=False)
@@ -66,7 +69,9 @@ class PackageSearchForm(forms.Form):
     flagged = forms.ChoiceField(
             choices=[('', 'All')] + make_choice(['Flagged', 'Not Flagged']),
             required=False)
-    limit = LimitTypedChoiceField(choices=make_choice([50, 100, 250]) + [('all', 'All')], coerce=coerce_limit_value,
+    limit = LimitTypedChoiceField(
+            choices=make_choice([50, 100, 250]) + [('all', 'All')],
+            coerce=coerce_limit_value,
             required=False,
             initial=50)
 
@@ -79,12 +84,11 @@ class PackageSearchForm(forms.Form):
         self.fields['q'].widget.attrs.update({"size": "30"})
         maints = User.objects.filter(is_active=True).order_by('username')
         self.fields['maintainer'].choices = \
-                [('', 'All'), ('orphan', 'Orphan')] + \
+                [('', 'All')] + \
                 [(m.username, m.username) for m in maints]
         self.fields['packager'].choices = \
                 [('', 'All'), ('unknown', 'Unknown')] + \
                 [(m.username, m.username) for m in maints]
-
 
 def search(request, page=None):
     limit = 50
@@ -100,12 +104,17 @@ def search(request, page=None):
                 packages = packages.filter(architecture__name__in=form.cleaned_data['arch'])
 
             if form.cleaned_data['maintainer']:
-                packages = packages.filter(packager__name__in=form.cleaned_data['maintainer'])
+                packages = packages.filter(packager__username__contains=form.cleaned_data['maintainer'])
 
             if form.cleaned_data['q']:
                 query = form.cleaned_data['q']
                 desc = Description.objects.filter(desc__icontains=query)  # TODO
                 packages = packages.filter(name__icontains=query)
+
+            if form.cleaned_data['last_update']:
+                lu = form.cleaned_data['last_update']
+                packages = packages.filter(pub_date__gte=
+                        datetime(lu.year, lu.month, lu.day, 0, 0))
 
             asked_limit = form.cleaned_data['limit']
             if asked_limit and asked_limit < 0:
@@ -122,16 +131,15 @@ def search(request, page=None):
             'search_form': form,
             'current_query': current_query
     }
-    #allowed_sort = ["arch", "repo", "pkgname", "pkgbase",
-            #"compressed_size", "installed_size",
-            #"build_date", "last_update", "flag_date"]
-    allowed_sort = []
+    allowed_sort = ["architecture", "distribution", "name", "pkgbase",
+            "compressed_size", "installed_size",
+            "build_date", "last_update", "flag_date"]
     allowed_sort += ["-" + s for s in allowed_sort]
     sort = request.GET.get('sort', None)
     # TODO: sorting by multiple fields makes using a DB index much harder
     if sort in allowed_sort:
         packages = packages.order_by(
-                request.GET['sort'], 'repo', 'arch', 'pkgname')
+                request.GET['sort'], 'distribution', 'architecture', 'name')
         page_dict['sort'] = sort
     else:
         packages = packages.order_by('name')
@@ -142,6 +150,3 @@ def search(request, page=None):
             paginate_by=limit,
             template_object_name="package",
             extra_context=page_dict)
-
-
-

@@ -42,10 +42,15 @@
         </tr>
         <tr>
             <th>License(s):</th>
-            <td>{{ pkg.licenses|join:", " }}</td>
+            <td>
+                {% for license in pkg.licenses %}
+                <a href="http://svn.pardus.org.tr/uludag/trunk/doc/en/licenses/{{ license }}">{{ license }}</a>
+                {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         <tr>
-            <th>Groups:</th>
+            <th>Component:</th>
             {% with pkg.partOf as partOf %}
             <td>{% if partOf %}
                 <a href="/packages/group/{{ partOf }}/"
@@ -67,9 +72,6 @@
         </tr><tr>
             <th>Last Packager:</th>
             <td>{{ pkg.last_packager }}</td>
-        </tr><tr>
-            <th>Build Date:</th>
-            <td> UTC</td>
         </tr><tr>
             <th>Last Updated:</th>
             <td>{{ pkg.last_update }}</td>

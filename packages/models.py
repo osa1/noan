@@ -25,17 +25,25 @@ class Package(models.Model):
     homepage = models.URLField()
     packager = models.ForeignKey(User)
     dependencies = models.ManyToManyField('self', symmetrical=False)
+    last_update = models.DateField('last update', null=True)
+    pkgbase = models.CharField(max_length=250)
+
+    flag_date = models.DateTimeField(null=True)
 
     objects = PackageManager()
 
     @property
+    def url(self):
+        return "%s/%s/%s" % (self.distribution, self.architecture, self.name)
+
+    @property
     def last_packager(self):
-        packager = Update.objects.filter(package=self)[0].packager.username
+        packager = Update.objects.filter(package=self)[0].packager
         return packager if packager else self.packager.username
 
     @property
-    def last_update(self):
-        return Update.objects.filter(package=self)[0].date
+    def full_version(self):
+        return Update.objects.filter(package=self)[0].version
 
     @property
     def pkgdesc(self):
@@ -44,10 +52,6 @@ class Package(models.Model):
     @property
     def licenses(self):
         return [license.name for license in self.license.all()]
-
-    @property
-    def full_version(self):
-        return ""
 
     @property
     def repo(self):
@@ -77,7 +81,7 @@ class Update(models.Model):
     release = models.IntegerField()
     version = models.CharField(max_length=256)
     comment = models.TextField()
-    packager = models.ForeignKey(User)
+    packager = models.CharField(max_length=255)
     package = models.ForeignKey(Package)
     date = models.DateField()
 

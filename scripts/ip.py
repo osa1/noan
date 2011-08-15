@@ -9,14 +9,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from packages.models import *
 
-#baseurl = "http://packages.pardus.org.tr/pardus/"
-#version = ("2011/",)
-#repos = ("devel/",)
-#architecture = ("i686",)
+baseurl = "http://packages.pardus.org.tr/pardus/"
+version = ("2011", "2011")
+repos = ("devel", "testing")
+architecture = ("i686", "i686")
 
 t = time.time()
 base = 'http://packages.pardus.org.tr/pardus/2011/devel/i686/pisi-index.xml'
-fpath = '/home/pars/packages_pardus/xml_index'
+
 
 
 def urlretrieve(urlfile, fpath):
@@ -31,105 +31,129 @@ def urlretrieve(urlfile, fpath):
             break
         f.write(data)
 
-if not os.path.exists(fpath):
-    urlretrieve(urllib2.urlopen(base), fpath)
-
-pisi_index = pisi.index.Index()
-pisi_index.decode(piksemel.parseString(open(fpath, 'r').read()), [])
-
 def createAttr(model, attrList):
     for attr in attrList:
-        try: 
+        try:
             model.objects.get(name = attr)
         except ObjectDoesNotExist:
             model(name=attr).save()
 
+Distribution(name="2011-devel").save()
 
-#max_packs = 10  # number of packages to import for testing
-for package in pisi_index.packages:
-    #max_packs -= 1
-    #if max_packs == 0:
-        #break
-    allAttr = ('isA', 'partOf', 'license', 'buildHost', 'distribution', 'architecture', 'packager')
-    modelList = (isA, partOf, License, BuildHost, Distribution, Architecture, User)
-    for model, attribute in zip(modelList, allAttr):
-        if attribute == 'packager':
-            packager = package.source.packager
-            try:
-                User.objects.get(username=packager.name, password="1234")
-            except ObjectDoesNotExist:
-                User(username=packager.name, password="1234", email=packager.email).save()  # TODO
-        else:
-            attrList = getattr(package, attribute)
-            if isinstance(attrList, list):
-                createAttr(model, attrList)
+
+for xml in zip(version, repos, architecture):
+    base = baseurl + '/'.join(xml) + '/pisi-index.xml'
+    print "base:", base
+    url = baseurl + ''.join(xml)
+
+    fpath = '/home/pars/packages_pardus/xml_index' + ''.join(xml) + '.xml'
+    print "fpath:", fpath
+    if not os.path.exists(fpath):
+        urlretrieve(urllib2.urlopen(base), fpath)
+    dist = xml[0] + '-' + xml[1]
+
+    pisi_index = pisi.index.Index()
+    pisi_index.decode(piksemel.parseString(open(fpath, 'r').read()), [])
+
+    #max_packs = 10  # number of packages to import for testing
+    for package in pisi_index.packages:
+        #max_packs -= 1
+        #if max_packs == 0:
+            #break
+        allAttr = ('isA', 'partOf', 'license', 'buildHost', 'distribution', 'architecture', 'packager')
+        modelList = (isA, partOf, License, BuildHost, Distribution, Architecture, User)
+        for model, attribute in zip(modelList, allAttr):
+            if attribute == 'packager':
+                packager = package.source.packager
+                try:
+                    User.objects.get(username=packager.name, password="1234")
+                except ObjectDoesNotExist:
+                    User(username=packager.name, password="1234", email=packager.email).save()  # TODO
             else:
-                createAttr(model, [attrList])
+                attrList = getattr(package, attribute)
+                if isinstance(attrList, list):
+                    createAttr(model, attrList)
+                else:
+                    createAttr(model, [attrList])
 
-    _name = package.name
-    _pub_date = package.history[0].date
-    #_isA = isA.objects.get(name=package.isA)
-    _partOf = partOf.objects.get(name=package.partOf)
-    #_license = License.objects.get(name=package.license)
-    _build_host = BuildHost.objects.get(name=package.buildHost)
-    _dist = Distribution.objects.get(name=package.distribution)
-    _arch = Architecture.objects.get(name=package.architecture)
-    _installed_size = package.installedSize
-    _package_size = package.packageSize
-    _package_hash = package.packageHash
-    _package_format = package.packageFormat
-    _homepage = package.source.homepage
-    _packager = User.objects.get(username=package.source.packager.name)
+        _name = package.name
+        _pub_date = package.history[0].date
+        #_isA = isA.objects.get(name=package.isA)
+        _partOf = partOf.objects.get(name=package.partOf)
+        #_license = License.objects.get(name=package.license)
+        _build_host = BuildHost.objects.get(name=package.buildHost)
+        _arch = Architecture.objects.get(name=package.architecture)
+        _installed_size = package.installedSize
+        _package_size = package.packageSize
+        _package_hash = package.packageHash
+        _package_format = package.packageFormat
+        _homepage = package.source.homepage
+        _packager = User.objects.get(username=package.source.packager.name)
+        _pkgbase = package.source.name
 
-    p = Package(name=_name,
-            pub_date=_pub_date,
-            partOf=_partOf,
-            build_host=_build_host,
-            distribution=_dist,
-            architecture=_arch,
-            installed_size=_installed_size,
-            package_size=_package_size,
-            package_hash=_package_hash,
-            package_format=_package_format,
-            homepage=_homepage,
-            packager=_packager)
-    p.save()
+        p = Package(name=_name,
+                pub_date=_pub_date,
+                partOf=_partOf,
+                build_host=_build_host,
+                distribution=Distribution.objects.get(name=dist),
+                architecture=_arch,
+                installed_size=_installed_size,
+                package_size=_package_size,
+                package_hash=_package_hash,
+                package_format=_package_format,
+                homepage=_homepage,
+                packager=_packager,
+                pkgbase=_pkgbase)
+        p.save()
 
-    for isa in package.isA:
-        p.isA.add(isA.objects.get(name=isa))
+        for isa in package.isA:
+            p.isA.add(isA.objects.get(name=isa))
 
-    for license in package.license:
-        p.license.add(License.objects.get(name=license))
+        for license in package.license:
+            p.license.add(License.objects.get(name=license))
 
-    for key, item in package.description.items():
-        d = Description(lang=key, desc=item, package=p)
-        d.save()
+        for key, item in package.description.items():
+            d = Description(lang=key, desc=item, package=p)
+            d.save()
 
-    for key, item in package.summary.items():
-        s = Summary(lang=key, sum=item, package=p)
-        s.save()
+        for key, item in package.summary.items():
+            s = Summary(lang=key, sum=item, package=p)
+            s.save()
 
-    for update in package.history:
+        username = package.source.packager.name
         try:
-            user = User.objects.get(username=update.name)
-        except ObjectDoesNotExist:
-            user = User(username=update.name, password="1234")
+            user = User.objects.get(username=username)
+        except user.DoesNotExist:
+            user = User(username=username)
             user.save()
-        u = Update(version=update.version, release=update.release,
-                comment=update.comment,
-                packager=user,
-                package=p,
-                date=update.date)
-        u.save()
 
-    print package.name, "added"
+        first = True
+        for update in package.history:
+            #try:
+                #user = User.objects.get(username=update.name)
+            #except ObjectDoesNotExist:
+                #user = User(username=update.name, password="1234")
+                #user.save()
+            u = Update(version=update.version, release=update.release,
+                    comment=update.comment,
+                    packager=update.name,
+                    package=p,
+                    date=update.date)
+            u.save()
+            if first:
+                p.last_update = u.date
+                p.save()
+                first = False
 
-# Second pass for dependencies
-for package in pisi_index.packages:
-    pack = Package.objects.get(name=package.name)
-    print "adding deps of", pack.name
-    _deps = [Package.objects.get(name=p.package) for p in package.runtimeDependencies()]
-    for dep in _deps:
-        pack.dependencies.add(dep)
+        print package.name, "added"
 
-print time.time()-t
+    # Second pass for dependencies
+    for package in pisi_index.packages:
+        pack = Package.objects.get(name=package.name)
+        print "adding deps of", pack.name
+        _deps = [Package.objects.get(name=p.package) for p in package.runtimeDependencies()]
+        for dep in _deps:
+            pack.dependencies.add(dep)
+
+    print time.time()-t
+
