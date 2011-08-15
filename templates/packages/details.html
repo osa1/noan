@@ -1,22 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}Arch Linux - {{ pkg.pkgname }} {{ pkg.full_version }} - Package Details{% endblock %}
+{% block title %}Pardus - {{ pkg.name }} {{ pkg.full_version }} - Package Details{% endblock %}
 
 {% block content %}
 <div id="pkgdetails" class="box">
 
-    <h2>Package Details: {{ pkg.pkgname }} {{ pkg.full_version }}</h2>
-
-    <div id="detailslinks" class="listing">
+    <h2>Package Details: {{ pkg.name }} {{ pkg.full_version }}</h2>
+<div id="detailslinks" class="listing">
 
         <div id="actionlist">
         <h4>Package Actions</h4>
             <ul class="small">
-                <li><a href="svn arch" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.arch}} branch">SVN Entries ({{pkg.repo|lower}}-{{pkg.arch}})</a></li>
+                <li><a href="svn architecture" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries ({{pkg.repo|lower}}-{{pkg.architecture}})</a></li>
                 <li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>
-                <li><a href="bug list" title="View existing bug tickets for {{ pkg.pkgname }}">Bug Reports</a></li>
-                <li><a href="bug report" title="Report bug for {{ pkg.pkgname }}">Report a Bug</a></li>
-                <li><a href="download/" rel="nofollow" title="Download {{ pkg.pkgname }} from mirror">Download From Mirror</a></li>
+                <li><a href="bug list" title="View existing bug tickets for {{ pkg.name }}">Bug Reports</a></li>
+                <li><a href="bug report" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
+                <li><a href="download/" rel="nofollow" title="Download {{ pkg.name }} from mirror">Download From Mirror</a></li>
             </ul>
         </div>
     </div><!-- #actionlist -->
@@ -24,8 +23,8 @@
     <table id="pkginfo">
         <tr>
             <th>Architecture:</th>
-            <td><a href="/packages/?arch={{ pkg.arch.name }}"
-                    title="Browse packages for {{ pkg.arch.name }} architecture">{{ pkg.arch.name }}</a></td>
+            <td><a href="/packages/?architecture={{ pkg.architecture.name }}"
+                    title="Browse packages for {{ pkg.architecture.name }} architectureitecture">{{ pkg.architecture.name }}</a></td>
         </tr>
         <tr>
             <th>Repository:</th>
@@ -34,12 +33,12 @@
         </tr>
         <tr>
             <th>Description:</th>
-            <td class="wrap">{{ pkg.pkgdesc|default:"" }}</td>
+            <td class="wrap">{{ pkg.pkgdesc.desc|default:"" }}</td>
         </tr>
         <tr>
             <th>Upstream URL:</th>
-            <td>{% if pkg.url %}<a href="{{ pkg.url }}"
-                    title="Visit the website for {{ pkg.pkgname }}">{{ pkg.url }}</a>{% endif %}</td>
+            <td>{% if pkg.homepage %}<a href="{{ pkg.homepage }}"
+                    title="Visit the website for {{ pkg.name }}">{{ pkg.homepage }}</a>{% endif %}</td>
         </tr>
         <tr>
             <th>License(s):</th>
@@ -47,17 +46,17 @@
         </tr>
         <tr>
             <th>Groups:</th>
-            {% with pkg.groups as groups %}
-            <td>{% if groups %}
-                <a href="/groups/{{ pkg.arch.name }}/{{ group.name }}/"
-                    title="Group details for {{ group.name }}">{{ group.name }}</a><br/>
+            {% with pkg.partOf as partOf %}
+            <td>{% if partOf %}
+                <a href="/packages/group/{{ partOf }}/"
+                    title="Group details for {{ partOf }}">{{ partOf }}</a><br/>
                 {% else %}None{% endif %}
             </td>
             {% endwith %}
          </tr><tr>
             <th>Maintainers:</th>
             <td>
-                {{ pkg.maintainer }}
+                {{ pkg.packager }}
             </td>
         </tr><tr>
             <th>Package Size:</th>
@@ -73,38 +72,52 @@
             <td> UTC</td>
         </tr><tr>
             <th>Last Updated:</th>
-            <td>last update</td>
+            <td>{{ pkg.last_update }}</td>
         </tr>
 
     </table>
 
     <div id="metadata">
 
-        {% with pkg.get_depends as deps %}
+        {% with pkg.deps as deps %}
         <div id="pkgdeps" class="listing">
 
-            <h3 title="{{ pkg.pkgname }} has the following dependencies">
+            <h3 title="{{ pkg.name }} has the following dependencies">
                 Dependencies ({{deps|length}})</h3>
 
             {% if deps %}
             <ul>
                 {% for depend in deps %}
-                {% ifequal depend.pkg None %}
-                <li>{{ depend.dep.depname }} <span class="virtual-dep">(virtual)</span></li>
-                {% else %}
-                <li><a href="{{ depend.pkg.get_absolute_url }}"
-                    title="View package details for {{ depend.dep.depname }}">{{ depend.dep.depname }}</a>{{ depend.dep.depvcmp|default:"" }} {% if depend.pkg.repo.testing %}<span class="testing-dep">(testing)</span>{% endif %}
-                {% if depend.dep.optional %}<span class="opt-dep">(optional)</span>{% endif %}
-                {% if depend.dep.description %}- <span class="dep-desc">{{ depend.dep.description }}</span>{% endif %}
+                <li><a href="/packages/{{ pkg.distribution }}/{{ pkg.architecture }}/{{ depend }}/"
+                    title="View package details for {{ depend }}">{{ depend }}</a>{{ depend.dep.depvcmp|default:"" }}
                 </li>
-                {% endifequal %}
                 {% endfor %}
             </ul>
             {% endif %}
 
+
+
         </div><!-- #pkgdeps -->
         {% endwith %}
 
+        {% with pkg.revdeps as revdeps %}
+        <div id="pkgreqs" class="listing">
+
+            <h3 title="Packages that require {{ pkg.name }}">
+                Required By ({{revdeps|length}})</h3>
+
+            {% if revdeps %}
+            <ul>
+                {% for dep in revdeps %}
+                <li><a href="/packages/{{ pkg.distribution }}/{{ pkg.architecture }}/{{ dep.name }}/"
+                    title="View package details for {{ dep.name }}">{{ dep.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div><!-- #pkgreqs -->
+        {% endwith %}
 
         <div id="pkgfiles" class="listing">
 
@@ -113,8 +126,8 @@
 
             <div id="pkgfilelist">
                 <p><a id="filelink" href="files/"
-                    title="Click to view the complete file list for {{ pkg.pkgname }}">
-                    View the file list for {{ pkg.pkgname }}</a></p>
+                    title="Click to view the complete file list for {{ pkg.name }}">
+                    View the file list for {{ pkg.name }}</a></p>
             </div>
 
         </div><!-- #pkgfiles -->

@@ -7,8 +7,8 @@
 
     <h2>Package Signoffs</h2>
 
-    <p>{{ signoff_groups|length }} signoff group{{ signoff_groups|pluralize }} found.
-    A "signoff group" consists of packages grouped by pkgbase, architecture, and repository.</p>
+    <p>{{ signoff_partOf|length }} signoff group{{ signoff_partOf|pluralize }} found.
+    A "signoff group" consists of packages grouped by name, architectureitecture, and repository.</p>
 
     <table id="signoffs" class="results">
         <thead>
@@ -24,12 +24,12 @@
             </tr>
         </thead>
         <tbody>
-            {% for group in signoff_groups %}
+            {% for group in signoff_partOf %}
             {% with group.package as pkg %}
             <tr class="{% cycle 'odd' 'even' %}">
-                <td>{{ pkg.arch.name }}</td>
-                <td><a href="{{ pkg.get_absolute_url }}"
-                        title="View package details for {{ pkg.pkgname }}">{{ pkg.pkgname }}</a></td>
+                <td>{{ pkg.architecture.name }}</td>
+                <td><a href="{{ pkg.get_absolute_homepage }}"
+                        title="View package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
                 <td>{{ group.packages|length }}</td>
                 <td>{{ pkg.full_version }}</td>
                 <td>{{ pkg.last_update|date }}</td>
@@ -38,8 +38,8 @@
                     {{ group.approved|yesno:"Yes,No" }}</td>
                 <td>
                     <ul>
-                        <li><a class="signoff-link" href="{{ pkg.get_absolute_url }}signoff/"
-                            title="Signoff {{ pkg.pkgname }} for {{ pkg.arch }}">Signoff</a>
+                        <li><a class="signoff-link" href="{{ pkg.get_absolute_homepage }}signoff/"
+                            title="Signoff {{ pkg.name }} for {{ pkg.architecture }}">Signoff</a>
                         </li>
                         {% for signoff in group.signoffs %}
                         <li class="signed-username" title="Signed off by {{ signoff.user }}">
@@ -55,7 +55,7 @@
 </div>
 {% load cdn %}{% jquery %}
 <script type="text/javascript" src="/media/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="/media/archweb.js"></script>
+<script type="text/javascript" src="/media/architectureweb.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $('a.signoff-link').click(signoff_package);

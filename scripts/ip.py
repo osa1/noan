@@ -58,7 +58,7 @@ for package in pisi_index.packages:
             try:
                 User.objects.get(username=packager.name, password="1234")
             except ObjectDoesNotExist:
-                User(username=packager.name, password="1234").save()
+                User(username=packager.name, password="1234", email=packager.email).save()  # TODO
         else:
             attrList = getattr(package, attribute)
             if isinstance(attrList, list):

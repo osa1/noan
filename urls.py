@@ -5,6 +5,9 @@ from packages.views import details
 from django.contrib import admin
 admin.autodiscover()
 
+from django.conf import settings
+import os.path
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'packages_pardus.views.home', name='home'),
@@ -15,5 +18,10 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^packages/(?P<dist>[A-z0-9\-]+)/(?P<arch>[A-z0-9]+)/(?P<name>[A-z0-9\-+.]+)/', details),
+    url(r'^packages/', include('packages.urls')),
 )
+
+if settings.DEBUG == True:
+    urlpatterns += patterns('',
+        (r'^media/(.*)$', 'django.views.static.serve',
+            {'document_root': os.path.join(settings.DEPLOY_PATH, 'media')}))

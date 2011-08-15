@@ -24,10 +24,10 @@
             {% for relation in inactive_user %}
             <tr class="{% cycle 'odd' 'even' %}">
                 <td><input type="checkbox" name="relation_id" value="{{ relation.id }}" /></td>
-                <td>{{ relation.pkgbase }}</td>
+                <td>{{ relation.name }}</td>
                 <td class="wrap">{% for pkg in relation.get_associated_packages %}
-                    <a href="{{ pkg.get_absolute_url }}"
-                        title="View package details for {{ pkg.pkgname }}">{{ pkg.repo|lower }}/{{ pkg.pkgname }} ({{ pkg.arch }})</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ pkg.get_absolute_homepage }}"
+                        title="View package details for {{ pkg.name }}">{{ pkg.repo|lower }}/{{ pkg.name }} ({{ pkg.architecture }})</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}</td>
                 <td>{{ relation.user.get_full_name }}</td>
                 <td>{{ relation.get_type_display }}</td>
@@ -39,9 +39,9 @@
         </tbody>
     </table>
 
-    <h3>Relations with Non-existent <tt>pkgbase</tt> ({{ missing_pkgbase|length }})</h3>
+    <h3>Relations with Non-existent <tt>name</tt> ({{ missing_name|length }})</h3>
 
-    <table class="results" id="missing-pkgbase">
+    <table class="results" id="missing-name">
         <thead>
             <tr>
                 <th>&nbsp;</th>
@@ -52,16 +52,16 @@
             </tr>
         </thead>
         <tbody>
-            {% for relation in missing_pkgbase %}
+            {% for relation in missing_name %}
             <tr class="{% cycle 'odd' 'even' %}">
                 <td><input type="checkbox" name="relation_id" value="{{ relation.id }}" /></td>
-                <td>{{ relation.pkgbase }}</td>
+                <td>{{ relation.name }}</td>
                 <td>{{ relation.user.get_full_name }}</td>
                 <td>{{ relation.get_type_display }}</td>
                 <td>{{ relation.created }}</td>
             </tr>
             {% empty %}
-                <tr class="empty"><td colspan="4"><em>No non-existent pkgbase relations.</em></td></tr>
+                <tr class="empty"><td colspan="4"><em>No non-existent name relations.</em></td></tr>
             {% endfor %}
         </tbody>
     </table>
@@ -84,10 +84,10 @@
             {% for relation in wrong_permissions %}
             <tr class="{% cycle 'odd' 'even' %}">
                 <td><input type="checkbox" name="relation_id" value="{{ relation.id }}" /></td>
-                <td>{{ relation.pkgbase }}</td>
+                <td>{{ relation.name }}</td>
                 <td class="wrap">{% for pkg in relation.get_associated_packages %}
-                    <a href="{{ pkg.get_absolute_url }}"
-                        title="View package details for {{ pkg.pkgname }}">{{ pkg.repo|lower }}/{{ pkg.pkgname }} ({{ pkg.arch }})</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ pkg.get_absolute_homepage }}"
+                        title="View package details for {{ pkg.name }}">{{ pkg.repo|lower }}/{{ pkg.name }} ({{ pkg.architecture }})</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}</td>
                 <td>{{ relation.user.get_full_name }}</td>
                 <td>{{ relation.created }}</td>
@@ -107,11 +107,11 @@
 </div>
 {% load cdn %}{% jquery %}
 <script type="text/javascript" src="/media/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="/media/archweb.js"></script>
+<script type="text/javascript" src="/media/architectureweb.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $('#inactive-user:not(:has(tbody tr.empty))').tablesorter({widgets: ['zebra'], headers: { 0: { sorter: false } }, sortList: [[3,0]]});
-    $('#missing-pkgbase:not(:has(tbody tr.empty))').tablesorter({widgets: ['zebra'], headers: { 0: { sorter: false } }, sortList: [[1,0]]});
+    $('#missing-name:not(:has(tbody tr.empty))').tablesorter({widgets: ['zebra'], headers: { 0: { sorter: false } }, sortList: [[1,0]]});
 });
     $('#wrong-permissions:not(:has(tbody tr.empty))').tablesorter({widgets: ['zebra'], headers: { 0: { sorter: false } }, sortList: [[3,0]]});
 </script>

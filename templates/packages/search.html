@@ -19,8 +19,8 @@
         {{ search_form.non_field_errors }}
         <fieldset>
             <legend>Enter search criteria</legend>
-            <div>{{ search_form.arch.errors }}
-                <label for="id_arch" title="Limit results a specific CPU architecture">
+            <div>{{ search_form.architecture.errors }}
+                <label for="id_architecture" title="Limit results a specific CPU architectureitecture">
                     Arch</label>{{ search_form.arch }}</div>
             <div>{{ search_form.repo.errors }}
                 <label for="id_repo" title="Limit results to a specific respository">
@@ -28,9 +28,9 @@
             <div>{{ search_form.q.errors }}
                 <label for="id_q" title="Enter keywords as desired">
                     Keywords</label>{{ search_form.q }}</div>
-            <div>{{ search_form.maintainer.errors }}
-                <label for="id_maintainer" title="Limit results to a specific maintainer">
-                    Maintainer</label>{{ search_form.maintainer}}</div>
+            <div>{{ search_form.packager.errors }}
+                <label for="id_packager" title="Limit results to a specific packager">
+                    Maintainer</label>{{ search_form.maintainer }}</div>
             <div>{{ search_form.last_update.errors }}
                 <label for="id_last_update" title="Limit results to a date after the date entered">
                     Last Updated After</label>{{ search_form.last_update }}</div>
@@ -40,8 +40,8 @@
             <div>{{ search_form.limit.errors }}
                 <label for="id_limit" title="Select the number of results to display per page">
                     Per Page</label>{{ search_form.limit }}</div>
-            <div ><label>&nbsp;</label><input title="Search for packages using this criteria"
-                type="submit" value="Search" /></div>
+            <div ><label>&nbsp;</label><input title="search for packages using this criteria"
+                type="submit" value="search" /></div>
         </fieldset>
     </form>
 
@@ -53,8 +53,7 @@
     {% if paginator %}
     <div id="pkglist-stats-top">
 
-        <p>{{paginator.count}} packages found.
-        Page {{page_obj.number}} of {{paginator.num_pages}}.</p>
+        <p>{{paginator.count}} packages found.  Page {{page_obj.number}} of {{paginator.num_pages}}.</p>
 
         <p class="pkglist-nav">
             {% if page_obj.has_previous %}
@@ -82,18 +81,17 @@
                     {% if perms.main.change_package %}
                     <th>&nbsp;</th>
                     {% endif %}
-                    <th><a href="/packages/?{% buildsortqs "arch" %}"
-                            title="Sort packages by architecture">Arch</a></th>
+                    <th><a href="/packages/?{% buildsortqs "architecture" %}"
+                            title="Sort packages by architectureitecture">Arch</a></th>
                     <th><a href="/packages/?{% buildsortqs "repo" %}"
                             title="Sort packages by repository">Repo</a></th>
-                    <th><a href="/packages/?{% buildsortqs "pkgname" %}"
+                    <th><a href="/packages/?{% buildsortqs "name" %}"
                             title="Sort packages by package name">Name</a></th>
                     <th>Version</th>
                     <th>Description</th>
                     <th><a href="/packages/?{% buildsortqs "-last_update" %}"
                             title="Sort packages by last update">Last Updated</a></th>
-                    <th><a href="/packages/?{% buildsortqs "-flag_date" %}"
-                            title="Sort packages by when marked-out of-date">Flag Date</a></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -102,10 +100,10 @@
                     {% if perms.main.change_package %}
                     <td><input type="checkbox" name="pkgid" value="{{ pkg.id }}" /></td>
                     {% endif %}
-                    <td>{{ pkg.arch.name }}</td>
+                    <td>{{ pkg.architecture.name }}</td>
                     <td>{{ pkg.repo.name|capfirst }}</td>
-                    <td><a href="{{ pkg.get_absolute_url }}"
-                            title="Package details for {{ pkg.pkgname }}">{{ pkg.pkgname }}</a></td>
+                    <td><a href="{{ pkg.get_absolute_homepage }}"
+                            title="Package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
                     {% if pkg.flag_date %}
                     <td><span class="flagged">{{ pkg.full_version }}</span></td>
                     {% else %}
@@ -142,13 +140,6 @@
         </div>
         {% endif %}
 
-        {% if perms.main.change_package %}
-        <p><input title="Adopt selected packages" type="submit" id="adopt-btn"
-        name="adopt" value="Adopt Packages" />
-        <input title="Orphan selected packages" type="submit" id="disown-btn"
-        name="disown" value="Disown Packages" /></p>
-        {% endif %}
-
     </form>
 
 </div><!-- #pkglist-results -->
@@ -157,18 +148,11 @@
 	<p>We couldn't find any packages matching your query. Try searching again
 	using different criteria, or try
 	{% if search_form.q.data %}
-	<a href="https://aur.archlinux.org/packages.php?K={{ search_form.q.data }}">searching the AUR</a>
+	<a href="https://aur.architecturelinux.org/packages.php?K={{ search_form.q.data }}">searching the AUR</a>
 	{% else %}searching the AUR{% endif %}
 	to see if the package can be found there.</p>
 </div>
 {% endif %}
-
-<div id="pkglist-about" class="box">
-    <p>You are browsing the Arch Linux package database. From here you can find
-    detailed information about packages located in the official supported repositories.
-    For unsupported packages, browse the <a href="https://aur.archlinux.org/"
-        title="AUR package database">Arch User Repository (AUR).</a></p>
-</div>
 
 <script type="text/javascript" src="/jsi18n/"></script>
 {% load adminmedia %}<script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>

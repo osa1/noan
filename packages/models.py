@@ -4,6 +4,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class PackageManager(models.Manager):
+    def normal(self):
+        return self.select_related('arch', 'repo')
+
 class Package(models.Model):
     name = models.CharField(max_length=200)
     pub_date = models.DateField('date published')
@@ -22,11 +26,14 @@ class Package(models.Model):
     packager = models.ForeignKey(User)
     dependencies = models.ManyToManyField('self', symmetrical=False)
 
+    objects = PackageManager()
+
     @property
     def last_packager(self):
         packager = Update.objects.filter(package=self)[0].packager.username
         return packager if packager else self.packager.username
 
+    @property
     def last_update(self):
         return Update.objects.filter(package=self)[0].date
 
@@ -35,28 +42,8 @@ class Package(models.Model):
         return Description.objects.filter(package=self).get(lang="en")
 
     @property
-    def pkgname(self):
-        return self.name
-
-    @property
-    def groups(self):
-        return self.partOf
-
-    @property
-    def maintainer(self):
-        return self.packager
-
-    @property
-    def pkgbase(self):
-        return self.name
-
-    @property
     def licenses(self):
         return [license.name for license in self.license.all()]
-
-    @property
-    def url(self):
-        return self.homepage
 
     @property
     def full_version(self):
@@ -64,15 +51,19 @@ class Package(models.Model):
 
     @property
     def repo(self):
-        return "%s_%s" % (self.distribution, self.architecture)
-
-    @property
-    def arch(self):
-        return self.architecture
+        return self.distribution
 
     @property
     def flag_date(self):
         return ""
+
+    @property
+    def deps(self):
+        return [dep.name for dep in self.dependencies.all()]
+
+    @property
+    def revdeps(self):
+        return Package.objects.filter(dependencies__name=self.name)
 
 
 

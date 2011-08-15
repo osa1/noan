@@ -5,7 +5,6 @@
     <title>{% block title %}Arch Linux{% endblock %}</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="/media/archweb.css" media="screen, projection" />
-    <link rel="stylesheet" type="text/css" href="/media/archweb-print.css" media="print" />
     <link rel="icon" type="image/x-icon" href="/media/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="/media/favicon.ico" />
     <link rel="search" type="application/opensearchdescription+xml" href="{% url opensearch-packages as osp %}{{ osp }}" title="Arch Linux Packages" />
@@ -29,30 +28,6 @@
     </div><!-- #archnavbar -->
 
     <div id="content">
-        <div id="archdev-navbar">
-            {% if user.is_authenticated %}
-                <ul>
-                    <li><a href="{% url devel-index %}" title="Developer Dashboard">Dashboard</a></li>
-                    <li><a href="https://wiki.archlinux.org/index.php/DeveloperWiki"
-                        title="Developer Wiki">DevWiki</a></li>
-                    <li><a href="{% url news-list as newsl %}{{ newsl }}" title="Manage news articles">News</a></li>
-                    <li><a href="/packages/signoffs/" title="Package signoffs">Signoffs</a></li>
-                    <li><a href="/todo/" title="Developer todo lists">Todos</a></li>
-                    <li><a href="{% url devel-clocks %}" title="Developer world clocks">Dev Clocks</a></li>
-                    <li><a href="https://mailman.archlinux.org/mailman/private/arch-dev/"
-                        title="arch-dev mailing list archives">Archives</a></li>
-                    <li><a href="/mirrors/" title="Mirror server statistics">Mirrors</a></li>
-                    <li><a href="https://stats.archlinux.org/munin/"
-                        title="Arch server monitoring">Server Monitoring</a></li>
-                    {% if user.is_staff %}
-                    <li><a href="{% url admin:index %}" title="Django Admin Interface">Django Admin</a></li>
-                    {% endif %}
-                    <li><a href="/devel/profile/" title="Modify your account profile">Profile</a></li>
-                    <li><a href="/logout/" title="Logout of the developer interface">Logout</a></li>
-                </ul>
-            {% endif %}
-        </div><!-- #archdev-navbar -->
-
         {% if messages %}
             <div id="sys-message" class="box">
                 {% for message in messages %}

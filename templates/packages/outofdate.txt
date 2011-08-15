@@ -1,7 +1,7 @@
 {% autoescape off %}{{ email }} wants to notify you that the following packages may be out-of-date:
 
 {% for p in packages %}
-* {{ p.pkgname }} {{ p.full_version }} [{{ p.repo.name|lower }}] ({{ p.arch.name }}): {{ p.get_full_url }}{% endfor %}
+* {{ p.name }} {{ p.full_version }} [{{ p.repo.name|lower }}] ({{ p.architecture.name }}): {{ p.get_full_homepage }}{% endfor %}
 
 {% if message %}
 The user provided the following additional text:

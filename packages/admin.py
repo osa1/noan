@@ -28,7 +28,7 @@ class PackageAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'isA', 'partOf', 'license', 'build_host',
             'distribution', 'architecture', 'installed_size', 'package_size', 'package_hash',
-            'package_format', 'homepage', 'packager']}),
+            'package_format', 'homepage', 'packager', 'dependencies']}),
         ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
     ]
     inlines = [DescInLine, SumInLine, UpdateInLine]
