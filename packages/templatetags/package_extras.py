@@ -6,6 +6,7 @@ except ImportError:
 
 from django import template
 from django.utils.html import escape
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
@@ -84,5 +85,12 @@ def bug_report(package):
         'item_summary': '[%s]' % package.name,
     }
     return "https://bugs.archlinux.org/newtask?%s" % urlencode(data)
+
+@stringfilter
+def replace(name, char):
+    print name, char
+    return name.replace(char, '/')
+
+register.filter('replace', replace)
 
 # vim: set ts=4 sw=4 et:

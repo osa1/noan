@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load package_extras %}
 
 {% block title %}Pardus - {{ pkg.name }} {{ pkg.full_version }} - Package Details{% endblock %}
 
@@ -11,11 +12,11 @@
         <div id="actionlist">
         <h4>Package Actions</h4>
             <ul class="small">
-                <li><a href="svn architecture" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries ({{pkg.repo|lower}}-{{pkg.architecture}})</a></li>
-                <li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>
+                <li><a href="http://websvn.pardus.org.tr/pardus/{{ pkg.distribution|replace:"-" }}/{{ pkg.partOf.name|replace:"." }}/{{ pkg.name }}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries </a></li>
+                <!--<li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>-->
                 <li><a href="bug list" title="View existing bug tickets for {{ pkg.name }}">Bug Reports</a></li>
                 <li><a href="bug report" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
-                <li><a href="download/" rel="nofollow" title="Download {{ pkg.name }} from mirror">Download From Mirror</a></li>
+                <!--<li><a href="download/" rel="nofollow" title="Download {{ pkg.name }} from mirror">Download From Mirror</a></li>-->
             </ul>
         </div>
     </div><!-- #actionlist -->
