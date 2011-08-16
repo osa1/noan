@@ -25,6 +25,9 @@
             <div>{{ search_form.repo.errors }}
                 <label for="id_repo" title="Limit results to a specific respository">
                     Repository</label>{{ search_form.repo }}</div>
+            <div>{{ search_form.repo.errors }}
+                <label for="id_repo" title="Limit results to a specific respository">
+                    Component</label>{{ search_form.pkgbase }}</div>
             <div>{{ search_form.q.errors }}
                 <label for="id_q" title="Enter keywords as desired">
                     Keywords</label>{{ search_form.q }}</div>
@@ -85,6 +88,8 @@
                             title="Sort packages by architectureitecture">Arch</a></th>
                     <th><a href="/packages/?{% buildsortqs "distribution" %}"
                             title="Sort packages by repository">Repo</a></th>
+                    <th><a href="/packages/?{% buildsortqs "pkgbase" %}"
+                            title="Sort packages by components">Component</a></th>
                     <th><a href="/packages/?{% buildsortqs "name" %}"
                             title="Sort packages by package name">Name</a></th>
                     <th>Version</th>
@@ -103,6 +108,10 @@
                     {% endif %}
                     <td>{{ pkg.architecture.name }}</td>
                     <td>{{ pkg.repo.name|capfirst }}</td>
+                    <td><a href="/packages/?pkgbase={{pkg.partOf.name}}"
+                            title="Component details for {{ pkg.partOf.name }}">{{ pkg.partOf.name }}</a></td>
+                    <td><a href="/packages/{{ pkg.url }}"
+                            title="Package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
                     <td><a href="/packages/{{ pkg.url }}"
                             title="Package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
                     {% if pkg.flag_date %}

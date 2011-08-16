@@ -53,8 +53,8 @@
             <th>Component:</th>
             {% with pkg.partOf as partOf %}
             <td>{% if partOf %}
-                <a href="/packages/group/{{ partOf }}/"
-                    title="Group details for {{ partOf }}">{{ partOf }}</a><br/>
+                <a href="/packages/?pkgbase={{ partOf }}"
+                    title="Component details for {{ partOf }}">{{ partOf }}</a><br/>
                 {% else %}None{% endif %}
             </td>
             {% endwith %}
