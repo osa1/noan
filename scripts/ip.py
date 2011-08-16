@@ -10,14 +10,11 @@ from django.contrib.auth.models import User
 from packages.models import *
 
 baseurl = "http://packages.pardus.org.tr/pardus/"
-version = ("2011", "2011")
-repos = ("devel", "testing")
-architecture = ("i686", "i686")
+version = ("2011", "2011.1", "corporate2", "2009")
+repos = ("devel", "testing", "stable")
+architecture = ("i686", "x86_64")
 
 t = time.time()
-base = 'http://packages.pardus.org.tr/pardus/2011/devel/i686/pisi-index.xml'
-
-
 
 def urlretrieve(urlfile, fpath):
     # Tum dosyayi okumak aci verici oluyor(memory)
@@ -37,8 +34,6 @@ def createAttr(model, attrList):
             model.objects.get(name = attr)
         except ObjectDoesNotExist:
             model(name=attr).save()
-
-Distribution(name="2011-devel").save()
 
 
 for xml in zip(version, repos, architecture):
@@ -90,12 +85,17 @@ for xml in zip(version, repos, architecture):
         _homepage = package.source.homepage
         _packager = User.objects.get(username=package.source.packager.name)
         _pkgbase = package.source.name
+        try:
+            _dist = Distribution.objects.get(name=dist)
+        except Distribution.DoesNotExist:
+            _dist = Distribution(name=dist)
+            _dist.save()
 
         p = Package(name=_name,
                 pub_date=_pub_date,
                 partOf=_partOf,
                 build_host=_build_host,
-                distribution=Distribution.objects.get(name=dist),
+                distribution=_dist,
                 architecture=_arch,
                 installed_size=_installed_size,
                 package_size=_package_size,
