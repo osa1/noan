@@ -53,15 +53,16 @@
             <th>Component:</th>
             {% with pkg.partOf as partOf %}
             <td>{% if partOf %}
-                <a href="/packages/group/{{ partOf }}/"
+                <a href="/packages/?sort=&component={{ partOf }}/"
                     title="Group details for {{ partOf }}">{{ partOf }}</a><br/>
                 {% else %}None{% endif %}
             </td>
             {% endwith %}
          </tr><tr>
-            <th>Maintainers:</th>
+            <th>Maintainer:</th>
             <td>
-                {{ pkg.packager }}
+                <a href="/packages/?sort=&maintainer={{ pkg.packager }}"
+                    title="Packages maintained by {{ pkg.packager}}">{{ pkg.packager }}</a>
             </td>
         </tr><tr>
             <th>Package Size:</th>
