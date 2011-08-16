@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Q
 from django.contrib.admin.widgets import AdminDateWidget
-from packages.models import Package, Description, Architecture, Distribution
+from packages.models import Package, Description, Architecture, Distribution, partOf
 from django.contrib.auth.models import User
 
 from datetime import datetime
@@ -61,6 +61,7 @@ class LimitTypedChoiceField(forms.TypedChoiceField):
 class PackageSearchForm(forms.Form):
     repo = forms.MultipleChoiceField(required=False)
     arch = forms.MultipleChoiceField(required=False)
+    pkgbase = forms.MultipleChoiceField(required=False)
     q = forms.CharField(required=False)
     maintainer = forms.ChoiceField(required=False)
     packager = forms.ChoiceField(required=False)
@@ -81,6 +82,8 @@ class PackageSearchForm(forms.Form):
                         [repo.name for repo in Distribution.objects.all()])
         self.fields['arch'].choices = make_choice(
                         [arch.name for arch in Architecture.objects.all()])
+        self.fields['pkgbase'].choices = make_choice(
+                        [pkgbase.name for pkgbase in partOf.objects.all()])
         self.fields['q'].widget.attrs.update({"size": "30"})
         maints = User.objects.filter(is_active=True).order_by('username')
         self.fields['maintainer'].choices = \
@@ -105,6 +108,9 @@ def search(request, page=None):
 
             if form.cleaned_data['maintainer']:
                 packages = packages.filter(packager__username__contains=form.cleaned_data['maintainer'])
+
+            if form.cleaned_data['pkgbase']:
+                packages = packages.filter(partOf__name__in=form.cleaned_data['pkgbase'])
 
             if form.cleaned_data['q']:
                 query = form.cleaned_data['q']
@@ -139,7 +145,7 @@ def search(request, page=None):
     # TODO: sorting by multiple fields makes using a DB index much harder
     if sort in allowed_sort:
         packages = packages.order_by(
-                request.GET['sort'], 'distribution', 'architecture', 'name')
+                request.GET['sort'], 'distribution', 'architecture', 'name', 'pkgbase')
         page_dict['sort'] = sort
     else:
         packages = packages.order_by('name')

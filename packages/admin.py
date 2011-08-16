@@ -1,5 +1,5 @@
 from packages.models import Description, Package, Summary, isA, partOf, License, BuildHost
-from packages.models import Distribution, Architecture, Update
+from packages.models import Distribution, Architecture, Update, XmlHash
 from django.contrib import admin
 
 admin.site.register(Description)
@@ -11,6 +11,7 @@ admin.site.register(BuildHost)
 admin.site.register(Distribution)
 admin.site.register(Architecture)
 admin.site.register(Update)
+admin.site.register(XmlHash)
 
 class DescInLine(admin.StackedInline):
     model = Description

@@ -69,8 +69,6 @@ class Package(models.Model):
     def revdeps(self):
         return Package.objects.filter(dependencies__name=self.name)
 
-
-
     def __unicode__(self):
         return self.name
 
@@ -94,7 +92,9 @@ class Description(models.Model):
     desc = models.CharField(max_length=1000)
 
     def __unicode__(self):
-        return self.desc[:255] + '...'
+        if len(self.desc) > 255:
+            return self.desc[:255] + '...'
+        return self.desc
 
 class Summary(models.Model):
     package = models.ForeignKey(Package)
@@ -130,3 +130,10 @@ class Distribution(OneToMany):
 
 class Architecture(OneToMany):
     pass
+
+class XmlHash(models.Model):
+    name = models.CharField(max_length=500)
+    hash = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.hash)
