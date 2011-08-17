@@ -4,6 +4,7 @@
 import os
 import sys
 import pisi
+import lzma
 import time
 import urllib2
 import hashlib
@@ -30,19 +31,6 @@ ARCHITECTURE = ("i686", "x86_64")
 
 t = time.time()
 
-def urlretrieve(urlfile, fpath):
-    """urlfile'daki dosyayi urllib2 ile acip fpath'e yaz."""
-    print "download started: " + urlfile
-    urlfile = urllib2.urlopen(urlfile)
-    chunk = 4096
-    f = open(fpath, "w")
-    while 1:
-        data = urlfile.read(chunk)
-        if not data:
-            print "downloading done."
-            break
-        f.write(data)
-
 
 def createAttr(pisi_package, model, attribute):
     """attrList'deki attribute'lari, eger modelde zaten yoksa, modele ekle."""
@@ -56,31 +44,31 @@ def createAttr(pisi_package, model, attribute):
             model(name=attr).save()
 
 
-def check_sha1sum(filename, sha1sum):
-    """filename adli dosyanin sha1sum'i veritabaninda kayitli ve sha1sum ile
+def check_sha1sum(xml_url, sha1sum):
+    """xml_url adresindeki sha1sum'i veritabaninda kayitli ve sha1sum ile
     ayniysa True don."""
     try:
-        filehash = XmlHash.objects.get(name=filename)
+        filehash = XmlHash.objects.get(name=xml_url)
         if filehash.hash == sha1sum:
-            print "%s hash is identical."
+            print "%s hash is identical." % xml_url
             return True
     except XmlHash.DoesNotExist:
         return False
 
 
-def get_sha1sum(filepath):
-    sha1 = hashlib.sha1(str(os.path.getsize(filepath)) + '\0' + open(filepath, 'rb').read())
-    return sha1.hexdigest()
-
-
 def parse_index(filepath):
     pisi_index = pisi.index.Index()
-    pisi_index.decode(piksemel.parseString(open(filepath, 'r').read()), [])
+    pisi_index.decode(piksemel.parseString(filepath), [])
     print "piksemel parsing done."
     return pisi_index
 
 
-def create_package(pisi_package, attributes, dist):
+def create_package(pisi_package, dist):
+    # keys: her bir paketin sahip olmasi gereken fieldlar
+    # values: fieldlarin gosterdigi modeller
+    attributes = {'isA': isA, 'partOf': partOf, 'license': License, 'buildHost': BuildHost,
+            'distribution': Distribution, 'architecture': Architecture, 'packager': User}
+
     for attribute, model in attributes.iteritems():
         if attribute == 'packager':
             packager = pisi_package.source.packager
@@ -202,44 +190,29 @@ def link_dependencies(pisi_package, dist):
 
 if __name__ == '__main__':
     product = itertools.product(VERSION, REPOS, ARCHITECTURE)
-    try:
-        while True:
-            xml = product.next()
-            xml_url = BASEURL + '/'.join(xml) + '/pisi-index.xml'
-            filename = "index" + "".join(xml) + ".xml"
-            filepath = os.path.join(os.getcwd(), filename)
-            try:
-                urlretrieve(xml_url, filepath)
-            except urllib2.HTTPError:
-                continue  # bir sonraki dosyadan devam et
+    for xml in product:
+        xml_url = BASEURL + '/'.join(xml) + '/pisi-index.xml.xz'
+        sha1url = BASEURL + '/'.join(xml) + '/pisi-index.xml.xz.sha1sum'
+        try:
+            raw_data = urllib2.urlopen(xml_url)
+            sha1sum = urllib2.urlopen(sha1url).read()
+        except urllib2.HTTPError:
+            continue  # bir sonraki dosyadan devam et
 
-            print "fpath: " + filepath
-            sha1sum = get_sha1sum(filepath)
-            hash_record = check_sha1sum(filename, sha1sum)
-            if check_sha1sum(filename, sha1sum):
-                continue  # index sha1sum'i degismedi, bir sonraki indexden devam et
+        pisi_index = parse_index(lzma.decompress(raw_data.read()))
 
-            print h.heap()
-            pisi_index = parse_index(filepath)
-            print h.heap()
-
-            # keys: her bir paketin sahip olmasi gereken fieldlar
-            # values: fieldlarin gosterdigi modeller
-            package_attributes = {'isA': isA, 'partOf': partOf, 'license': License, 'buildHost': BuildHost,
-                    'distribution': Distribution, 'architecture': Architecture, 'packager': User}
-
+        if not check_sha1sum(xml_url, sha1sum):  # sha1sum'lar farkli
             dist = xml[0] + '-' + xml[1]
+            print dist
             count = 0
             for package in pisi_index.packages:
-                if count == 100:
-                    break
-                count += 1
-                create_package(package, package_attributes, dist)
+                create_package(package, dist)
 
-            XmlHash(name=filename, hash=sha1sum).save()
-            continue  # XXX DEBUG
+            try:
+                xmlhash = XmlHash.objects.get(name=xml_url)
+                xmlhash.hash = sha1sum
+                xmlhash.save()
+            except XmlHash.DoesNotExist:
+                XmlHash(name=xml_url, hash=sha1sum).save()
             for package in pisi_index.packages:
                 link_dependencies(package, dist)
-
-    except StopIteration:
-        pass
