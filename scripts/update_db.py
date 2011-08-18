@@ -94,6 +94,7 @@ def create_package(pisi_package, dist):
     _homepage = pisi_package.source.homepage
     _packager = User.objects.get(username=pisi_package.source.packager.name)
     _pkgbase = pisi_package.source.name
+    _uri = pisi_package.packageURI
     try:
         _dist = Distribution.objects.get(name=dist)
     except Distribution.DoesNotExist:
@@ -101,35 +102,23 @@ def create_package(pisi_package, dist):
         _dist.save()
 
 
-    # arayacagimiz paketin ozellikleri
-    kwargs = {'name': _name, 'distribution': _dist, 'architecture': _arch}
-    try:
-        p = Package.objects.get(**kwargs)
-        if (p.package_hash != pisi_package.packageHash):
-            p.pub_date = _pub_date
-            p.build_host = _build_host
-            p.installed_size =_installed_size
-            p.package_size = _package_size
-            p.package_hash = _package_hash
-            p.package_format = _package_format
-            p.homepage = _homepage
-            p.packager = _packager
-            p.pkgbase = _pkgbase
-            p.save()
-    except Package.DoesNotExist:
-        kwargs.update({'pub_date': _pub_date,
-                     'partOf': _partOf,
-                     'build_host': _build_host,
-                     'installed_size': _installed_size,
-                     'package_size': _package_size,
-                     'package_hash': _package_hash,
-                     'package_format': _package_format,
-                     'homepage': _homepage,
-                     'packager': _packager,
-                     'pkgbase': _pkgbase})
-        p = Package(**kwargs)
-        p.save()
-        print pisi_package.name, "added"
+    kwargs = {'name': _name,
+            'distribution': _dist,
+            'architecture': _arch,
+            'pub_date': _pub_date,
+            'partOf': _partOf,
+            'build_host': _build_host,
+            'installed_size': _installed_size,
+            'package_size': _package_size,
+            'package_hash': _package_hash,
+            'package_format': _package_format,
+            'homepage': _homepage,
+            'packager': _packager,
+            'pkgbase': _pkgbase,
+            'uri': _uri}
+
+    p = Package(**kwargs)
+    p.save()
 
     for isa in pisi_package.isA:  # XXX
         p.isA.add(isA.objects.get(name=isa))
@@ -157,7 +146,7 @@ def create_package(pisi_package, dist):
         user.save()
 
     first = True
-    for update in package.history:
+    for update in pisi_package.history:
         u = Update(version=update.version, release=update.release,
                 comment=update.comment,
                 packager=update.name,
@@ -170,6 +159,7 @@ def create_package(pisi_package, dist):
             first = False
 
     p.save()
+    print "\t" + pisi_package.name, "added"
 
 
 def link_dependencies(pisi_package, dist):
@@ -184,29 +174,44 @@ def link_dependencies(pisi_package, dist):
     for dep in _deps:
         try:
             pack.dependencies.get(package=dep)
-        except ObjectDoesNotExist:
+        except Package.DoesNotExist:
             pack.dependencies.add(dep)
 
 
 if __name__ == '__main__':
     product = itertools.product(VERSION, REPOS, ARCHITECTURE)
     for xml in product:
+        db_set = set()
+        pisi_dict = dict()
         xml_url = BASEURL + '/'.join(xml) + '/pisi-index.xml.xz'
         sha1url = BASEURL + '/'.join(xml) + '/pisi-index.xml.xz.sha1sum'
         try:
+            print "downloading started"
             raw_data = urllib2.urlopen(xml_url)
+            print sha1url
             sha1sum = urllib2.urlopen(sha1url).read()
         except urllib2.HTTPError:
-            continue  # bir sonraki dosyadan devam et
+            continue  # bir sonraki indexten devam et
 
+        print "decompressing started."
         pisi_index = parse_index(lzma.decompress(raw_data.read()))
+        print "decompressing finished."
 
         if not check_sha1sum(xml_url, sha1sum):  # sha1sum'lar farkli
             dist = xml[0] + '-' + xml[1]
-            print dist
-            count = 0
             for package in pisi_index.packages:
-                create_package(package, dist)
+                pisi_dict[package.packageHash] = package
+
+            for package in Package.objects.all():
+                db_set.add(package.package_hash)
+
+            pisi_set = set(pisi_dict.keys())
+            for obsolete_package in db_set - pisi_set:
+                Package.objects.get(package_hash=obsolete_package).delete()
+                print pisi_dict[obsolete_package].name, "deleted."
+
+            for new_package in pisi_set - db_set:
+                create_package(pisi_dict[new_package], dist)
 
             try:
                 xmlhash = XmlHash.objects.get(name=xml_url)
@@ -214,5 +219,6 @@ if __name__ == '__main__':
                 xmlhash.save()
             except XmlHash.DoesNotExist:
                 XmlHash(name=xml_url, hash=sha1sum).save()
+
             for package in pisi_index.packages:
                 link_dependencies(package, dist)
