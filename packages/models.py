@@ -29,6 +29,7 @@ class Package(models.Model):
     pkgbase = models.CharField(max_length=250)
 
     flag_date = models.DateTimeField(null=True)
+    uri = models.CharField(max_length=250)
 
     objects = PackageManager()
 
@@ -69,6 +70,10 @@ class Package(models.Model):
     def revdeps(self):
         return Package.objects.filter(dependencies__name=self.name)
 
+    @property
+    def updates(self):
+        return Update.objects.filter(package=self)
+
     def __unicode__(self):
         return self.name
 
@@ -83,8 +88,13 @@ class Update(models.Model):
     package = models.ForeignKey(Package)
     date = models.DateField()
 
+    @property
+    def packager_email(self):
+        return User.objects.get(username=self.packager).email
+
     def __unicode__(self):
         return "%s_%s" % (self.release, self.version)
+
 
 class Description(models.Model):
     package = models.ForeignKey(Package)

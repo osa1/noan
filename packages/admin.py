@@ -29,7 +29,7 @@ class PackageAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'isA', 'partOf', 'license', 'build_host',
             'distribution', 'architecture', 'installed_size', 'package_size', 'package_hash',
-            'package_format', 'homepage', 'packager', 'last_update', 'dependencies']}),
+            'package_format', 'homepage', 'packager', 'last_update', 'dependencies', 'uri']}),
         ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
     ]
     inlines = [DescInLine, SumInLine, UpdateInLine]

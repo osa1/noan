@@ -83,7 +83,7 @@ class PackageSearchForm(forms.Form):
         self.fields['arch'].choices = make_choice(
                         [arch.name for arch in Architecture.objects.all()])
         self.fields['pkgbase'].choices = make_choice(
-                        [pkgbase.name for pkgbase in partOf.objects.all()])
+                        [pkgbase.name for pkgbase in partOf.objects.all().order_by('name')])
         self.fields['q'].widget.attrs.update({"size": "30"})
         maints = User.objects.filter(is_active=True).order_by('username')
         self.fields['maintainer'].choices = \
@@ -148,7 +148,7 @@ def search(request, page=None):
                 request.GET['sort'], 'distribution', 'architecture', 'name', 'pkgbase')
         page_dict['sort'] = sort
     else:
-        packages = packages.order_by('name')
+        packages = packages.order_by('-last_update')
 
     return list_detail.object_list(request, packages,
             template_name="packages/search.html",

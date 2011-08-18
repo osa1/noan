@@ -7,7 +7,6 @@ import pisi
 import lzma
 import time
 import urllib2
-import hashlib
 import piksemel
 import itertools
 
@@ -118,7 +117,6 @@ def create_package(pisi_package, dist):
             'uri': _uri}
 
     p = Package(**kwargs)
-    p.save()
 
     for isa in pisi_package.isA:  # XXX
         p.isA.add(isA.objects.get(name=isa))
@@ -225,6 +223,14 @@ if __name__ == '__main__':
             except XmlHash.DoesNotExist:
                 XmlHash(name=xml_url, hash=sha1sum).save()
 
-            continue
             for package in pisi_index.packages:
                 link_dependencies(package, dist)
+
+    try:
+        Distribution.objects.get(name="Pardus Corporate").delete()
+    except Distribution.DoesNotExist:
+        pass
+    try:
+        Distribution.objects.get(name="Pardus").delete()
+    except Distribution.DoesNotExist:
+        pass

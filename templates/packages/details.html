@@ -12,10 +12,11 @@
         <div id="actionlist">
         <h4>Package Actions</h4>
             <ul class="small">
-                <li><a href="http://websvn.pardus.org.tr/pardus/{{ pkg.distribution|replace:"-" }}/{{ pkg.partOf.name|replace:"." }}/{{ pkg.name }}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries </a></li>
+                <li><a href="http://websvn.pardus.org.tr/pardus/{{ pkg.distribution|replace:"-" }}/{{ pkg.partOf.name|replace:"." }}/{{ pkg.pkgbase }}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries </a></li>
                 <!--<li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>-->
-                <li><a href="bug list" title="View existing bug tickets for {{ pkg.name }}">Bug Reports</a></li>
-                <li><a href="bug report" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
+                <li><a href="http://bugzilla.pardus.org.tr/enter_bug.cgi?product=2011%20paketleri%20%2F%202011%20packages&component={{ pkg.pkgbase }}&rep_platform={{ pkg.architecture }}" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
+                <li><a href="http://bugzilla.pardus.org.tr/enter_bug.cgi?product=2011%20paketleri%20%2F%202011%20packages&component={{ pkg.pkgbase }}&rep_platform={{ pkg.architecture }}" title="Bug reports for {{ pkg.name }}">Bug Reports</a></li>
+                <li><a href="http://packages.pardus.org.tr/pardus/{{ pkg.distribution|replace:"-" }}/{{ pkg.architecture }}/{{ pkg.uri }}" title="Download {{ pkg.name }}">Download</a></li>
                 <!--<li><a href="download/" rel="nofollow" title="Download {{ pkg.name }} from mirror">Download From Mirror</a></li>-->
             </ul>
         </div>
@@ -54,7 +55,7 @@
             <th>Component:</th>
             {% with pkg.partOf as partOf %}
             <td>{% if partOf %}
-                <a href="/packages/?sort=&component={{ partOf }}/"
+                <a href="/packages/?sort=&pkgbase={{ partOf }}"
                     title="Group details for {{ partOf }}">{{ partOf }}</a><br/>
                 {% else %}None{% endif %}
             </td>
@@ -72,7 +73,7 @@
             <th>Installed Size:</th>
             <td>{{ pkg.installed_size|filesizeformat }}</td>
         </tr><tr>
-            <th>Last Packager:</th>
+            <th>Last Updater:</th>
             <td>{{ pkg.last_packager }}</td>
         </tr><tr>
             <th>Last Updated:</th>
@@ -135,6 +136,22 @@
             </div>
 
         </div><!-- #pkgfiles -->
+
+        <div id="pkgpatches" class="listing">
+
+            <h3 title="{{ pkg.name }} patches">Package History</h3>
+
+            <ul>
+                {% for update in pkg.updates %}
+                <li>
+                    {{ update.date }}, ver {{ update.version }} release {{ update.release }} - {{ update.packager }}
+                    ({{ update.packager_email }})
+                    {{ update.comment }}
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div><!-- #pkgpatches -->
 
     </div><!-- #metadata -->
 

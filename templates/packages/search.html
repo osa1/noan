@@ -14,7 +14,6 @@
     <h2>{% trans "Package Database" %}</h2>
 
     <h3>Package Search</h3>
-    {% trans "test" %}
     <form id="pkg-search" method="get" action="/packages/">
         <p><input type="hidden" name="sort" value='{{sort}}' /></p>
         {{ search_form.non_field_errors }}
@@ -38,9 +37,9 @@
             <div>{{ search_form.last_update.errors }}
                 <label for="id_last_update" title="Limit results to a date after the date entered">
                     Last Updated After</label>{{ search_form.last_update }}</div>
-            <div>{{ search_form.flagged.errors }}
-                <label for="id_flagged" title="Limit results based on out-of-date status">
-                    Flagged</label>{{ search_form.flagged }}</div>
+            <!--<div>{{ search_form.flagged.errors }}-->
+                <!--<label for="id_flagged" title="Limit results based on out-of-date status">-->
+                    <!--Flagged</label>{{ search_form.flagged }}</div>-->
             <div>{{ search_form.limit.errors }}
                 <label for="id_limit" title="Select the number of results to display per page">
                     Per Page</label>{{ search_form.limit }}</div>
@@ -97,8 +96,8 @@
                     <th>Description</th>
                     <th><a href="/packages/?{% buildsortqs "-last_update" %}"
                             title="Sort packages by last update">Last Updated</a></th>
-                    <th><a href="/packages/?{% buildsortqs "-flag_date" %}"
-                            title="Sort packages by when marked-out of-date">Flag Date</a></th>
+                    <!--<th><a href="/packages/?{% buildsortqs "-flag_date" %}"-->
+                            <!--title="Sort packages by when marked-out of-date">Flag Date</a></th>-->
                 </tr>
             </thead>
             <tbody>
@@ -120,7 +119,7 @@
                     {% endif %}
                     <td class="wrap">{{ pkg.pkgdesc }}</td>
                     <td>{{ pkg.last_update|date }}</td>
-                    <td>{{ pkg.flag_date|date }}</td>
+                    <!--<td>{{ pkg.flag_date|date }}</td>-->
                 </tr>
             {% endfor %}
             </tbody>
