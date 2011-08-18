@@ -194,21 +194,26 @@ if __name__ == '__main__':
             continue  # bir sonraki indexten devam et
 
         print "decompressing started."
-        pisi_index = parse_index(lzma.decompress(raw_data.read()))
+        xml_data = lzma.decompress(raw_data.read())
         print "decompressing finished."
+        print "Pisi index parse started."
+        pisi_index = parse_index(xml_data)
+        print "Pisi index parse completed."
 
         if not check_sha1sum(xml_url, sha1sum):  # sha1sum'lar farkli
             dist = xml[0] + '-' + xml[1]
             for package in pisi_index.packages:
                 pisi_dict[package.packageHash] = package
 
-            for package in Package.objects.all():
+            print dist
+            for package in Package.objects.filter(distribution__name=dist, architecture__name=xml[2]):
                 db_set.add(package.package_hash)
 
             pisi_set = set(pisi_dict.keys())
             for obsolete_package in db_set - pisi_set:
-                Package.objects.get(package_hash=obsolete_package).delete()
-                print pisi_dict[obsolete_package].name, "deleted."
+                p = Package.objects.get(package_hash=obsolete_package)
+                p.delete()
+                print p.name, "deleted."
 
             for new_package in pisi_set - db_set:
                 create_package(pisi_dict[new_package], dist)
@@ -220,5 +225,6 @@ if __name__ == '__main__':
             except XmlHash.DoesNotExist:
                 XmlHash(name=xml_url, hash=sha1sum).save()
 
+            continue
             for package in pisi_index.packages:
                 link_dependencies(package, dist)
