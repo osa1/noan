@@ -16,7 +16,7 @@
                 <!--<li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>-->
                 <li><a href="http://bugzilla.pardus.org.tr/enter_bug.cgi?product={{ pkg.distribution.name|split:"-"|getVersion:"tr" }}%20paketleri%20%2F%20{{ pkg.distribution.name|split:"-"|getVersion }}%20packages&component={{ pkg.pkgbase }}&rep_platform={{ pkg.architecture }}" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
                 <li><a href="http://bugzilla.pardus.org.tr/buglist.cgi?query_format=specific&order=bugs.bug_id+desc&bug_status=__open__&product={{ pkg.distribution.name|split:"-"|getVersion:"tr" }}%20paketleri%20%2F%20{{ pkg.distribution.name|split:"-"|getVersion }}%20packages&component={{ pkg.pkgbase }}" title="Bug reports for {{ pkg.name }}">Bug Reports</a></li>
-                <li><a href="http://packages.pardus.org.tr/pardus/{{ pkg.distribution.name|split:"-"|getVersion:"tr" }}/{{ pkg.architecture }}/{{ pkg.uri }}" title="Download {{ pkg.name }}">Download</a></li>
+                <li><a href="http://packages.pardus.org.tr/pardus/{{ pkg.distribution.name|replace:"-"}}/{{ pkg.architecture }}/{{ pkg.uri }}" title="Download {{ pkg.name }}">Download</a></li>
                 <!--<li><a href="download/" rel="nofollow" title="Download {{ pkg.name }} from mirror">Download From Mirror</a></li>-->
             </ul>
         </div>
