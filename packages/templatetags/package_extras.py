@@ -88,9 +88,35 @@ def bug_report(package):
 
 @stringfilter
 def replace(name, char):
-    print name, char
+    #print  "replace: ", name, char
     return name.replace(char, '/')
 
+@stringfilter
+def split(name, delimiter):
+    #print  "split:", name, delimiter
+    return name.split(delimiter)
+
+def getVersion(value, lang='en'):
+    if value[0].startswith('2'):
+        return value[0] 
+    else:
+        value = value[0]
+        if lang == 'tr':
+            return "Kurumsal" + value[-1]
+        else:
+            return "Corporate" + value[-1]
+
+#def indexAt(value, index):
+    #"""Returns the index item in a list."""
+    #try:
+        #return value[int(index)]
+    #except IndexError:
+        #return u''
+
+
+register.filter('getVersion', getVersion)
+#register.filter('indexAt', indexAt)
 register.filter('replace', replace)
+register.filter('split', split)
 
 # vim: set ts=4 sw=4 et:

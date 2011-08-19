@@ -10,8 +10,8 @@ import urllib2
 import piksemel
 import itertools
 
-from guppy import hpy
-h = hpy()
+#from guppy import hpy
+#h = hpy()
 
 
 location = os.path.dirname(os.path.join(os.getcwd(), __file__)).rsplit('/', 1)[0]
@@ -118,6 +118,8 @@ def create_package(pisi_package, dist):
 
     p = Package(**kwargs)
 
+    p.save()
+    print "\t" + pisi_package.name, "added"
     for isa in pisi_package.isA:  # XXX
         p.isA.add(isA.objects.get(name=isa))
 
@@ -156,8 +158,6 @@ def create_package(pisi_package, dist):
             p.save()
             first = False
 
-    p.save()
-    print "\t" + pisi_package.name, "added"
 
 
 def link_dependencies(pisi_package, dist):

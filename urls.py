@@ -23,5 +23,6 @@ urlpatterns = patterns('',
 
 if settings.DEBUG == True:
     urlpatterns += patterns('',
-        (r'^media/(.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(settings.DEPLOY_PATH, 'media')}))
+        (r'^media/(.*)$', 'django.views.static.serve',{'document_root':
+                                               os.path.join(settings.DEPLOY_PATH, 'media')}), 
+                            (r'^jsi18n/$',   'django.views.i18n.null_javascript_catalog'), )
