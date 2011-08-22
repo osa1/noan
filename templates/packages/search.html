@@ -31,15 +31,15 @@
             <div>{{ search_form.q.errors }}
                 <label for="id_q" title="Enter keywords as desired">
                     Keywords</label>{{ search_form.q }}</div>
+            <div>{{ search_form.search_files.errors }}
+                <label for="id_search_files" title="Search in package files">
+                    Search in files</label>{{ search_form.search_files }}</div>
             <div>{{ search_form.packager.errors }}
                 <label for="id_packager" title="Limit results to a specific packager">
                     Maintainer</label>{{ search_form.maintainer }}</div>
             <div>{{ search_form.last_update.errors }}
                 <label for="id_last_update" title="Limit results to a date after the date entered">
                     Last Updated After</label>{{ search_form.last_update }}</div>
-            <!--<div>{{ search_form.flagged.errors }}-->
-                <!--<label for="id_flagged" title="Limit results based on out-of-date status">-->
-                    <!--Flagged</label>{{ search_form.flagged }}</div>-->
             <div>{{ search_form.limit.errors }}
                 <label for="id_limit" title="Select the number of results to display per page">
                     Per Page</label>{{ search_form.limit }}</div>
@@ -93,32 +93,36 @@
                     <th><a href="/packages/?{% buildsortqs "name" %}"
                             title="Sort packages by package name">Name</a></th>
                     <th>Version</th>
+                    {% if files %}
+                    <th>Files</th>
+                    {% else %}
                     <th>Description</th>
+                    {% endif %}
                     <th><a href="/packages/?{% buildsortqs "-last_update" %}"
                             title="Sort packages by last update">Last Updated</a></th>
-                    <!--<th><a href="/packages/?{% buildsortqs "-flag_date" %}"-->
-                            <!--title="Sort packages by when marked-out of-date">Flag Date</a></th>-->
                 </tr>
             </thead>
             <tbody>
             {% for pkg in package_list %}
                 <tr class="{% cycle 'odd' 'even' %}">
                     {% if perms.main.change_package %}
-                    <td><input type="checkbox" name="pkgid" value="{{ pkg.id }}" /></td>
+                    <td style="width: 1px;"><input type="checkbox" name="pkgid" value="{{ pkg.id }}" /></td>
                     {% endif %}
-                    <td>{{ pkg.architecture.name }}</td>
-                    <td>{{ pkg.repo.name|capfirst }}</td>
-                    <td><a href="/packages/?pkgbase={{pkg.partOf.name}}"
+                    <td style="width: 1px;">{{ pkg.architecture.name }}</td>
+                    <td style="width: 1px;">{{ pkg.repo.name|capfirst }}</td>
+                    <td style="width: 1px;"><a href="/packages/?pkgbase={{pkg.partOf.name}}"
                             title="Component details for {{ pkg.partOf.name }}">{{ pkg.partOf.name }}</a></td>
-                    <td><a href="/packages/{{ pkg.url }}"
+                    <td style="width: 1px;"><a href="/packages/{{ pkg.url }}"
                             title="Package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
-                    {% if pkg.flag_date %}
-                    <td><span class="flagged">{{ pkg.full_version }}</span></td>
-                    {% else %}
-                    <td>{{ pkg.full_version }}</td>
-                    {% endif %}
-                    <td class="wrap">{{ pkg.pkgdesc }}</td>
-                    <td>{{ pkg.last_update|date }}</td>
+                    <td style="width: 1px;">{{ pkg.full_version }}</td>
+                    <td class="wrap">
+                        {% if files %}
+                            file1, file2, file3, ...
+                        {% else %}
+                            {{ pkg.pkgdesc }}
+                        {% endif %}
+                    </td>
+                    <td style="width: 1px;">{{ pkg.last_update|date }}</td>
                     <!--<td>{{ pkg.flag_date|date }}</td>-->
                 </tr>
             {% endfor %}
@@ -154,12 +158,12 @@
 {% else %}
 <!-- TODO -->
 <div class="box">
-	<p>We couldn't find any packages matching your query. Try searching again
-	using different criteria, or try
-	{% if search_form.q.data %}
-	<a href="https://aur.architecturelinux.org/packages.php?K={{ search_form.q.data }}">searching the AUR</a>
-	{% else %}searching the AUR{% endif %}
-	to see if the package can be found there.</p>
+    <p>We couldn't find any packages matching your query. Try searching again
+    using different criteria, or try
+    {% if search_form.q.data %}
+    <a href="https://aur.architecturelinux.org/packages.php?K={{ search_form.q.data }}">searching the AUR</a>
+    {% else %}searching the AUR{% endif %}
+    to see if the package can be found there.</p>
 </div>
 {% endif %}
 
