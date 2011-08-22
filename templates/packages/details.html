@@ -12,7 +12,7 @@
         <div id="actionlist">
         <h4>Package Actions</h4>
             <ul class="small">
-                <li><a href="http://websvn.pardus.org.tr/pardus/{{ pkg.distribution|replace:"-" }}/{{ pkg.partOf.name|replace:"." }}/{{ pkg.pkgbase }}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries </a></li>
+                <li><a href="http://websvn.pardus.org.tr/pardus/{{ pkg.distribution|dist_replace }}/{{ pkg.partOf.name|replace:"." }}/{{ pkg.pkgbase }}" title="View SVN entries in the {{pkg.repo|lower}}-{{pkg.architecture}} branch">SVN Entries </a></li>
                 <!--<li><a href="svn trunk" title="View SVN entries on trunk">SVN Entries (trunk)</a></li>-->
                 <li><a href="http://bugzilla.pardus.org.tr/enter_bug.cgi?product={{ pkg.distribution.name|split:"-"|getVersion:"tr" }}%20paketleri%20%2F%20{{ pkg.distribution.name|split:"-"|getVersion }}%20packages&component={{ pkg.pkgbase }}&rep_platform={{ pkg.architecture }}" title="Report bug for {{ pkg.name }}">Report a Bug</a></li>
                 <li><a href="http://bugzilla.pardus.org.tr/buglist.cgi?query_format=specific&order=bugs.bug_id+desc&bug_status=__open__&product={{ pkg.distribution.name|split:"-"|getVersion:"tr" }}%20paketleri%20%2F%20{{ pkg.distribution.name|split:"-"|getVersion }}%20packages&component={{ pkg.pkgbase }}" title="Bug reports for {{ pkg.name }}">Bug Reports</a></li>
@@ -157,4 +157,9 @@
 
 </div><!-- #pkgdetails -->
 
+{% load cdn %}{% jquery %}
+<script type="text/javascript" src="/media/archweb.js"></script>
+<script type="text/javascript">
+$(document).ready(ajaxifyFiles);
+</script>
 {% endblock %}

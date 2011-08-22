@@ -106,17 +106,18 @@ def getVersion(value, lang='en'):
         else:
             return "Corporate" + value[-1]
 
-#def indexAt(value, index):
-    #"""Returns the index item in a list."""
-    #try:
-        #return value[int(index)]
-    #except IndexError:
-        #return u''
+@stringfilter
+def dist_replace(value):
+    parts = value.split('-')
+    if parts[1] == 'stable':
+        parts[1] = 'testing'
+    return '/'.join(parts)
 
 
 register.filter('getVersion', getVersion)
 #register.filter('indexAt', indexAt)
 register.filter('replace', replace)
 register.filter('split', split)
+register.filter('dist_replace', dist_replace)
 
 # vim: set ts=4 sw=4 et:

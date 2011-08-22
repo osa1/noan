@@ -269,6 +269,6 @@ ul.admin-actions li { display: inline; padding-left: 1.5em; }
 #releng-feedback ul+.helptext { position: relative; top: -0.9em; }
 
 /* highlight current website in the navbar */
-#archnavbar.anb-home ul li#anb-home a { color: white !important; }
-#archnavbar.anb-packages ul li#anb-packages a { color: white !important; }
-#archnavbar.anb-download ul li#anb-download a { color: white !important; }
+#archnavbar.anb-home ul li#anb-home a { color: black !important; }
+#archnavbar.anb-packages ul li#anb-packages a { color: black !important; }
+#archnavbar.anb-download ul li#anb-download a { color: black !important; }

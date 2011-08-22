@@ -6,14 +6,39 @@ from django.contrib.auth.models import User
 
 from datetime import datetime
 
-from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404, get_list_or_404, redirect, render_to_response
+from django.http import Http404
+from django.shortcuts import render_to_response
 
 from django.views.generic import list_detail
 
 from django.views.generic.simple import direct_to_template
 
+import os
+import pisi
+
 make_choice = lambda l: [(str(m), str(m)) for m in l]
+
+def files(request, name, dist, arch):
+    p = Package.objects.get(name=name, distribution__name=dist, architecture__name=arch)
+    d = dist.split('-')
+    d.append(os.path.join(arch, p.uri))
+    filename = os.path.join('/var/www/localhost/htdocs/pardus/', *d)
+    print filename
+    try:
+        metadata, files = pisi.api.info_file(filename)
+
+        paths = [fileinfo.path for fileinfo in files.list]
+        paths.sort()
+    except:
+        paths = []
+
+    template = 'packages/files.html'
+    context = {'pkg': p,
+               'files': paths}
+    if request.is_ajax():
+        template = 'packages/files-list.html'
+    return direct_to_template(request, template, context)
+
 
 def details(request, name='', dist='', arch=''):
     if all([name, dist, arch]):
@@ -22,20 +47,16 @@ def details(request, name='', dist='', arch=''):
                     'architecture', 'distribution').get(name=name,
                             distribution__name__iexact=dist, architecture__name=arch)
             print name, dist, arch
-            #pkg = Package.objects.get(name="ogmtools")
-            #return direct_to_template(request, '/packages/details.html',
-                    #{'pkg': pkg, })
             return render_to_response('packages/details.html', {'pkg': pkg})
         except Exception as e:
             print e
-            pass
+            raise Http404
     else:
         context = {'packages': Package.objects.order_by('name')[:30],
                 'name': 'test',
                 'list_title': 'Package Details',
                 'arch': 'arch test'}
         return direct_to_template(request, 'packages/packages_list.html', context)
-        raise Http404
 
 
 def coerce_limit_value(value):
@@ -48,6 +69,7 @@ def coerce_limit_value(value):
     if value < 0:
         raise ValueError
     return value
+
 
 class LimitTypedChoiceField(forms.TypedChoiceField):
     def valid_value(self, value):
@@ -92,6 +114,7 @@ class PackageSearchForm(forms.Form):
         self.fields['packager'].choices = \
                 [('', 'All'), ('unknown', 'Unknown')] + \
                 [(m.username, m.username) for m in maints]
+
 
 def search(request, page=None):
     limit = 50
