@@ -7,7 +7,7 @@
  */
 
 /* container for the entire bar */
-#archnavbar { height: 119px !important; padding: 0 !important; background-image: url('HeadTile.png'); !important;  }
+#archnavbar { height: 119px !important; padding-left: 40px !important; background-image: url('HeadTile.png'); !important;  }
 
 /* logo trickery -- GIF for IE6 and PNG for the rest */
 #archnavbarlogo { float: left !important; margin: 0 !important; padding: 0 !important; height: 119px !important; width: 190px !important; }
