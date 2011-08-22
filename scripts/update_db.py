@@ -28,6 +28,7 @@ VERSION = ("2011", "corporate2")
 REPOS = ("devel", "testing", "stable")
 ARCHITECTURE = ("i686", "x86_64")
 
+BASE_CONTENT_FOLDER = '/var/www/localhost/htdocs/pardus/'
 t = time.time()
 
 
@@ -126,9 +127,24 @@ def create_package(pisi_package, dist):
     for license in pisi_package.license:
         p.license.add(License.objects.get(name=license))
 
+    pkgfiles = File.objects.filter(package=p)
+    for pkgfile in pkgfiles:
+        pkgfile.delete()
     descriptions = Description.objects.filter(package=p)
     for desc in descriptions:
         desc.delete()
+
+    d = p.distribution.name.split('-')
+    d.append(os.path.join(p.architecture.name, p.uri))
+    filename = os.path.join(BASE_CONTENT_FOLDER, *d)
+    try:
+        metadata, files = pisi.api.info_file(filename)
+        print filename
+        for fileinfo in files.list:
+            f = File(name=fileinfo.path, package=p)
+            f.save()
+    except:
+        pass
 
     for key, item in pisi_package.description.items():
         d = Description(lang=key, desc=item, package=p)
