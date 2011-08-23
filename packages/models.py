@@ -51,6 +51,10 @@ class Package(models.Model):
         return Description.objects.filter(package=self).get(lang="en")
 
     @property
+    def files(self):
+        return [pkgfile.filename for pkgfile in Files.objects.filter(package=self)]
+    
+    @property
     def licenses(self):
         return [license.name for license in self.license.all()]
 
@@ -113,6 +117,13 @@ class Summary(models.Model):
 
     def __unicode__(self):
         return self.sum
+
+class File(models.Model):
+    package = models.ForeignKey(Package)
+    name = models.CharField(max_length = 512)
+
+    def __unicode__(self):
+        return self.name
 
 class OneToMany(models.Model):
     name = models.CharField(max_length=255)
