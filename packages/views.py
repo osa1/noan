@@ -20,18 +20,8 @@ make_choice = lambda l: [(str(m), str(m)) for m in l]
 
 def files(request, name, dist, arch):
     p = Package.objects.get(name=name, distribution__name=dist, architecture__name=arch)
-    d = dist.split('-')
-    d.append(os.path.join(arch, p.uri))
-    filename = os.path.join('/var/www/localhost/htdocs/pardus/', *d)
-    print filename
-    try:
-        metadata, files = pisi.api.info_file(filename)
 
-        paths = [fileinfo.path for fileinfo in files.list]
-        paths.sort()
-    except:
-        paths = []
-
+    paths = p.package_files.split('\n')[:-1]
     template = 'packages/files.html'
     context = {'pkg': p,
                'files': paths}
@@ -85,6 +75,7 @@ class PackageSearchForm(forms.Form):
     arch = forms.MultipleChoiceField(required=False)
     pkgbase = forms.MultipleChoiceField(required=False)
     q = forms.CharField(required=False)
+    search_files = forms.BooleanField(required=False)
     maintainer = forms.ChoiceField(required=False)
     packager = forms.ChoiceField(required=False)
     last_update = forms.DateField(required=False, widget=AdminDateWidget(),
@@ -135,15 +126,18 @@ def search(request, page=None):
             if form.cleaned_data['pkgbase']:
                 packages = packages.filter(partOf__name__in=form.cleaned_data['pkgbase'])
 
-            if form.cleaned_data['q']:
-                query = form.cleaned_data['q']
-                desc = Description.objects.filter(desc__icontains=query)  # TODO
-                packages = packages.filter(name__icontains=query)
-
             if form.cleaned_data['last_update']:
                 lu = form.cleaned_data['last_update']
                 packages = packages.filter(pub_date__gte=
                         datetime(lu.year, lu.month, lu.day, 0, 0))
+
+            if form.cleaned_data['q']:
+                query = form.cleaned_data['q']
+                if form.cleaned_data['search_files']:
+                    packages = packages.filter(package_files__icontains=query)
+                else:
+                    desc = Description.objects.filter(desc__icontains=query)  # TODO
+                    packages = packages.filter(name__icontains=query)
 
             asked_limit = form.cleaned_data['limit']
             if asked_limit and asked_limit < 0:
