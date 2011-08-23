@@ -9,6 +9,7 @@ import time
 import urllib2
 import piksemel
 import itertools
+import cStringIO
 
 #from guppy import hpy
 #h = hpy()
@@ -127,9 +128,7 @@ def create_package(pisi_package, dist):
     for license in pisi_package.license:
         p.license.add(License.objects.get(name=license))
 
-    pkgfiles = File.objects.filter(package=p)
-    for pkgfile in pkgfiles:
-        pkgfile.delete()
+
     descriptions = Description.objects.filter(package=p)
     for desc in descriptions:
         desc.delete()
@@ -137,14 +136,17 @@ def create_package(pisi_package, dist):
     d = p.distribution.name.split('-')
     d.append(os.path.join(p.architecture.name, p.uri))
     filename = os.path.join(BASE_CONTENT_FOLDER, *d)
+    package_files = cStringIO.StringIO()
     try:
         metadata, files = pisi.api.info_file(filename)
         print filename
         for fileinfo in files.list:
-            f = File(name=fileinfo.path, package=p)
-            f.save()
-    except:
-        pass
+            package_files.write(fileinfo.path + '\n')
+        package_files.reset()
+        p.package_files = package_files.read()
+        p.save()
+    except Exception as e:
+        print e
 
     for key, item in pisi_package.description.items():
         d = Description(lang=key, desc=item, package=p)
