@@ -39,6 +39,9 @@ class Package(models.Model):
     def url(self):
         return "%s/%s/%s" % (self.distribution, self.architecture, self.name)
 
+    def get_absolute_url(self):
+        return self.url
+
     @property
     def last_packager(self):
         packager = Update.objects.filter(package=self)[0].packager
@@ -87,12 +90,9 @@ class Update(models.Model):
     version = models.CharField(max_length=256)
     comment = models.TextField()
     packager = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
     package = models.ForeignKey(Package)
     date = models.DateField()
-
-    @property
-    def packager_email(self):
-        return User.objects.get(username=self.packager).email
 
     def __unicode__(self):
         return "%s_%s" % (self.release, self.version)

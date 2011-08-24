@@ -24,10 +24,14 @@ from packages.models import *
 from django.contrib.auth.models import User
 
 
+#BASEURL = "http://packages.pardus.org.tr/pardus/"
+#VERSION = ("2011", "corporate2")
+#REPOS = ("devel", "testing", "stable")
+#ARCHITECTURE = ("i686", "x86_64")
 BASEURL = "http://packages.pardus.org.tr/pardus/"
-VERSION = ("2011", "corporate2")
-REPOS = ("devel", "testing", "stable")
-ARCHITECTURE = ("i686", "x86_64")
+VERSION = ("2011",)
+REPOS = ("stable",)
+ARCHITECTURE = ("i686",)
 
 BASE_CONTENT_FOLDER = '/var/www/localhost/htdocs/pardus/'
 t = time.time()
@@ -139,10 +143,9 @@ def create_package(pisi_package, dist):
     package_files = cStringIO.StringIO()
     try:
         metadata, files = pisi.api.info_file(filename)
-        print filename
         for fileinfo in files.list:
             package_files.write(fileinfo.path + '\n')
-        package_files.reset()
+        package_files.reset()  # cursor'u basa al
         p.package_files = package_files.read()
         p.save()
     except Exception as e:
@@ -169,6 +172,7 @@ def create_package(pisi_package, dist):
                 comment=update.comment,
                 packager=update.name,
                 package=p,
+                email = update.email,
                 date=update.date)
         u.save()
         if first:
