@@ -10,16 +10,30 @@ from django.http import Http404
 from django.shortcuts import render_to_response
 
 from django.views.generic import list_detail
-
 from django.views.generic.simple import direct_to_template
 
-import os
-import pisi
+from django.contrib.syndication.views import Feed
 
 make_choice = lambda l: [(str(m), str(m)) for m in l]
 
+
+class LastUpdatedPackages(Feed):
+    title = 'Last Updated Packages'
+    link = '/feed/packages/'
+    description = ''
+
+    def items(self):
+        return Package.objects.order_by('-last_update')[:5]
+
+    def item_title(self, item):
+        return item.name
+
+    def item_description(self, item):
+        return "description:" + item.pkgdesc.desc
+
 def files(request, name, dist, arch):
     p = Package.objects.get(name=name, distribution__name=dist, architecture__name=arch)
+    print p.package_files
 
     paths = p.package_files.split('\n')[:-1]
     template = 'packages/files.html'
@@ -110,6 +124,7 @@ class PackageSearchForm(forms.Form):
 def search(request, page=None):
     limit = 50
     packages = Package.objects.normal()
+    search_files = False  # boolean data to specify searching in files to template
 
     if request.GET:
         form = PackageSearchForm(data=request.GET)
@@ -135,6 +150,7 @@ def search(request, page=None):
                 query = form.cleaned_data['q']
                 if form.cleaned_data['search_files']:
                     packages = packages.filter(package_files__icontains=query)
+                    search_files = True
                 else:
                     desc = Description.objects.filter(desc__icontains=query)  # TODO
                     packages = packages.filter(name__icontains=query)
@@ -166,6 +182,8 @@ def search(request, page=None):
         page_dict['sort'] = sort
     else:
         packages = packages.order_by('-last_update')
+
+    page_dict['search_files'] = search_files
 
     return list_detail.object_list(request, packages,
             template_name="packages/search.html",

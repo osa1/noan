@@ -1,8 +1,9 @@
-# TODO CharField max_length ara degerleri
 # TODO source.packager.name gibi bir kisayol ara.
 
 from django.db import models
 from django.contrib.auth.models import User
+
+from django.db.models import Q
 
 class PackageManager(models.Manager):
     def normal(self):
@@ -73,7 +74,8 @@ class Package(models.Model):
 
     @property
     def revdeps(self):
-        return Package.objects.filter(dependencies__name=self.name)
+        q = Q(dependencies__name=self.name)&Q(dependencies__architecture=self.architecture)&Q(dependencies__distribution=self.distribution)
+        return Package.objects.filter(q)
 
     @property
     def updates(self):
@@ -93,6 +95,10 @@ class Update(models.Model):
     email = models.CharField(max_length=255)
     package = models.ForeignKey(Package)
     date = models.DateField()
+
+    @property
+    def comment_html(self):
+        return self.comment.replace('\n', '<br />')
 
     def __unicode__(self):
         return "%s_%s" % (self.release, self.version)
