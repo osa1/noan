@@ -114,7 +114,7 @@
             {% if revdeps %}
             <ul>
                 {% for dep in revdeps %}
-                <li><a href="/packages/{{ pkg.distribution }}/{{ pkg.architecture }}/{{ dep.name }}/"
+                <li><a href="/packages/{{ dep.distribution }}/{{ dep.architecture }}/{{ dep.name }}/"
                     title="View package details for {{ dep.name }}">{{ dep.name }}</a>
                 </li>
                 {% endfor %}
@@ -141,15 +141,35 @@
 
             <h3 title="{{ pkg.name }} patches">Package History</h3>
 
-            <ul>
-                {% for update in pkg.updates %}
-                <li>
-                    {{ update.date }}, ver {{ update.version }} release {{ update.release }} - {{ update.packager }}
-                    ({{ update.packager_email }})
-                    {{ update.comment }}
-                </li>
-                {% endfor %}
-            </ul>
+            <style type="text/css">
+                th { text-align: left; padding-left: 7px; }
+                td { padding: 0 5px; vertical-align: top; text-align: left; }
+            </style>
+                <table class="results">
+                    <tr>
+                        <th>Date</th>
+                        <th>Version</th>
+                        <th>Packager</th>
+                        <th>Details</th>
+                    </tr>
+                    {% for update in pkg.updates %}
+                    <tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ update.date|date:"Y-m-d" }}</td>
+                        <td>{{ update.version }}-{{ update.release }}</td>
+                        <td>
+                            {% with packager_username=update.packager|packager_username %}
+                            {% if packager_username %}
+                                <a href="/packages/?sort=&q=&maintainer={{ packager_username }}&last_update=&limit=50">
+                            {% else %}
+                                <a href="mailto:{{ update.email }}">
+                            {% endif %}
+                            {{ update.packager }}</a>
+                        </td>
+                        <td>{{ update.comment_html|safe }}</td>
+                        {% endwith %}
+                    </tr>
+                    {% endfor %}
+                </table>
 
         </div><!-- #pkgpatches -->
 

@@ -168,7 +168,7 @@ table#download-mirrors td.mirror-country { padding-top: 1em; }
 table#download-mirrors td.mirror-server { padding-right: 1em; }
 table#download-mirrors a { display: block; float: right; width: 4em; }
 
-/* pkglists/devlists */
+/* pkglists/devlists/pgkdetails */
 table.results { font-size: 0.846em; border-top: 1px dotted #999; border-bottom: 1px dotted #999; }
 table.results th { padding: 0.5em 1em 0.25em 0.25em; border-bottom: 1px solid #999; white-space: nowrap; background-color:#fff; }
 table.results td { padding: .3em 1em .3em 3px; }

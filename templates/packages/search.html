@@ -30,10 +30,10 @@
                     Component</label>{{ search_form.pkgbase }}</div>
             <div>{{ search_form.q.errors }}
                 <label for="id_q" title="Enter keywords as desired">
-                    Keywords</label>{{ search_form.q }}</div>
-            <div>{{ search_form.search_files.errors }}
+                    Keywords</label>{{ search_form.q }}
+            {{ search_form.search_files.errors }}
                 <label for="id_search_files" title="Search in package files">
-                    Search in files</label>{{ search_form.search_files }}</div>
+                    Search in package files</label>{{ search_form.search_files }}</div>
             <div>{{ search_form.packager.errors }}
                 <label for="id_packager" title="Limit results to a specific packager">
                     Maintainer</label>{{ search_form.maintainer }}</div>
@@ -43,7 +43,7 @@
             <div>{{ search_form.limit.errors }}
                 <label for="id_limit" title="Select the number of results to display per page">
                     Per Page</label>{{ search_form.limit }}</div>
-            <div ><label>&nbsp;</label><input title="search for packages using this criteria"
+            <div><label>&nbsp;</label><input title="search for packages using this criteria"
                 type="submit" value="search" /></div>
         </fieldset>
     </form>
@@ -93,7 +93,7 @@
                     <th><a href="/packages/?{% buildsortqs "name" %}"
                             title="Sort packages by package name">Name</a></th>
                     <th>Version</th>
-                    {% if files %}
+                    {% if search_files %}
                     <th>Files</th>
                     {% else %}
                     <th>Description</th>
@@ -116,14 +116,13 @@
                             title="Package details for {{ pkg.name }}">{{ pkg.name }}</a></td>
                     <td style="width: 1px;">{{ pkg.full_version }}</td>
                     <td class="wrap">
-                        {% if files %}
-                            file1, file2, file3, ...
+                        {% if search_files %}
+                        {% for
                         {% else %}
                             {{ pkg.pkgdesc }}
                         {% endif %}
                     </td>
                     <td style="width: 1px;">{{ pkg.last_update|date }}</td>
-                    <!--<td>{{ pkg.flag_date|date }}</td>-->
                 </tr>
             {% endfor %}
             </tbody>
@@ -159,11 +158,7 @@
 <!-- TODO -->
 <div class="box">
     <p>We couldn't find any packages matching your query. Try searching again
-    using different criteria, or try
-    {% if search_form.q.data %}
-    <a href="https://aur.architecturelinux.org/packages.php?K={{ search_form.q.data }}">searching the AUR</a>
-    {% else %}searching the AUR{% endif %}
-    to see if the package can be found there.</p>
+    using different criteria.</p>
 </div>
 {% endif %}
 
