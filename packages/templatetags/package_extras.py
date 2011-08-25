@@ -7,6 +7,8 @@ except ImportError:
 from django import template
 from django.template.defaultfilters import stringfilter
 
+from django.contrib.auth.models import User
+
 register = template.Library()
 
 class BuildQueryStringNode(template.Node):
@@ -64,11 +66,19 @@ def dist_replace(value):
         parts[1] = 'testing'
     return '/'.join(parts)
 
+@stringfilter
+def packager_username(packager):
+    """Return search page link with packages filtered by packager."""
+    try:
+        packager = User.objects.get(username=packager)
+        return packager.username
+    except User.DoesNotExist:
+        return None
+
 
 register.filter('getVersion', getVersion)
 #register.filter('indexAt', indexAt)
 register.filter('replace', replace)
 register.filter('split', split)
 register.filter('dist_replace', dist_replace)
-
-# vim: set ts=4 sw=4 et:
+register.filter('packager_username', packager_username)
