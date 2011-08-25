@@ -1,5 +1,0 @@
-You can now log into https://{{ site.domain }}/login/ with these login details:
-Username: {{ user.username }}
-Password: {{ password }}
-
-Please update your profile once logged in and change your password.
