@@ -34,7 +34,13 @@ DATABASES = {
 TIME_ZONE = 'America/Chicago' 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'tr'
+
+ugettext = lambda s: s  # https://docs.djangoproject.com/en/1.3/topics/i18n/deployment/
+LANGUAGES = (
+  ('tr', ugettext('Turkish')),
+  ('en', ugettext('English')),
+)
 
 SITE_ID = 1
 
@@ -100,6 +106,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    #'django.middleware.locale.LocaleMiddleware',
 )
 
 ROOT_URLCONF = 'packages_pardus.urls'

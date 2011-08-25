@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load package_extras %}
 {% load i18n %}
-{% block title %}Arch Linux - {% trans "Package Database" %}{% endblock %}
+{% block title %}Pardus - {% trans "Package Database" %}{% endblock %}
 {% block navbarclass %}anb-packages{% endblock %}
 
 {% block head %}
@@ -36,7 +36,7 @@
                     {% trans "Search in package files" %}</label>{{ search_form.search_files }}</div>
             <div>{{ search_form.packager.errors }}
                 <label for="id_packager" title="{% trans "Limit results to a specific packager" %}">
-                    {% trans "Maintainer" %}</label>{{ search_form.maintainer }}</div>
+                    {% trans "Packager" %}</label>{{ search_form.packager }}</div>
             <div>{{ search_form.last_update.errors }}
                 <label for="id_last_update" title="{% trans "Limit results to a date after the date entered" %}">
                     {% trans "Last Updated After" %}</label>{{ search_form.last_update }}</div>
@@ -44,7 +44,7 @@
                 <label for="id_limit" title="{% trans "Select the number of results to display per page" %}">
                     {% trans "Per Page" %}</label>{{ search_form.limit }}</div>
             <div><label>&nbsp;</label><input title="{% trans "search for packages using this criteria" %}"
-                type="submit" value="search" /></div>
+                type="submit" value="{% trans "Search" %}" /></div>
         </fieldset>
     </form>
 
@@ -85,11 +85,8 @@
         <table class="results">
             <thead>
                 <tr>
-                    {% if perms.main.change_package %}
-                    <th>&nbsp;</th>
-                    {% endif %}
                     <th><a href="/packages/?{% buildsortqs "architecture" %}"
-                            title="{% trans "Sort packages by architectureitecture" %}">{% trans "Arch" %}</a></th>
+                            title="{% trans "Sort packages by architecture" %}">{% trans "Arch" %}</a></th>
                     <th><a href="/packages/?{% buildsortqs "distribution" %}"
                             title="{% trans "Sort packages by repository" %}">{% trans "Repo" %}</a></th>
                     <th><a href="/packages/?{% buildsortqs "pkgbase" %}"
@@ -109,9 +106,6 @@
             <tbody>
             {% for pkg in package_list %}
                 <tr class="{% cycle 'odd' 'even' %}">
-                    {% if perms.main.change_package %}
-                    <td style="width: 1px;"><input type="checkbox" name="pkgid" value="{{ pkg.id }}" /></td>
-                    {% endif %}
                     <td style="width: 1px;">{{ pkg.architecture.name }}</td>
                     <td style="width: 1px;">{{ pkg.repo.name|capfirst }}</td>
                     <td style="width: 1px;"><a href="/packages/?pkgbase={{pkg.partOf.name}}"
@@ -121,7 +115,11 @@
                     <td style="width: 1px;">{{ pkg.full_version }}</td>
                     <td class="wrap">
                         {% if search_files %}
-                        {% for
+                            {% with files=pkg.package_files|find_files:q %}
+                                {% for file in files %}
+                                /{{ file|safe|escape }}{% if not forloop.last %}<br />{% endif %}
+                                {% endfor %}
+                            {% endwith %}
                         {% else %}
                             {{ pkg.pkgdesc }}
                         {% endif %}
@@ -165,8 +163,7 @@
 {% else %}
 <!-- TODO -->
 <div class="box">
-    <p>{% trans "We couldn't find any packages matching your query. Try searching again
-    using different criteria." %}</p>
+    <p>{% trans "We couldn't find any packages matching your query. Try searching again using different criteria." %}</p>
 </div>
 {% endif %}
 

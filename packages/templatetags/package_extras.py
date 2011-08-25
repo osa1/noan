@@ -9,6 +9,8 @@ from django.template.defaultfilters import stringfilter
 
 from django.contrib.auth.models import User
 
+import re
+
 register = template.Library()
 
 class BuildQueryStringNode(template.Node):
@@ -75,6 +77,13 @@ def packager_username(packager):
     except User.DoesNotExist:
         return None
 
+@stringfilter
+def find_files(file_list, file_name):
+    pattern = re.compile(file_name, re.IGNORECASE)
+    return [pattern.sub(lambda match: '<b>' + match.group(0) + '</b>', f) \
+            for f in file_list.split('\n') if file_name in f.lower()]
+
+
 
 register.filter('getVersion', getVersion)
 #register.filter('indexAt', indexAt)
@@ -82,3 +91,4 @@ register.filter('replace', replace)
 register.filter('split', split)
 register.filter('dist_replace', dist_replace)
 register.filter('packager_username', packager_username)
+register.filter('find_files', find_files)

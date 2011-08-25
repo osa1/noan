@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 
 from django.db.models import Q
 
+from django.utils import translation
+
 class PackageManager(models.Manager):
     def normal(self):
         return self.select_related('arch', 'repo')
@@ -54,7 +56,11 @@ class Package(models.Model):
 
     @property
     def pkgdesc(self):
-        return Description.objects.filter(package=self).get(lang="en")
+        lang = translation.get_language()
+        try:
+            return Description.objects.get(package=self, lang=lang)
+        except Description.DoesNotExist:
+            return Description.objects.get(package=self, lang='en')
 
     @property
     def licenses(self):

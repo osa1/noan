@@ -14,6 +14,8 @@ from django.views.generic.simple import direct_to_template
 
 from django.contrib.syndication.views import Feed
 
+from django.utils.translation import ugettext as _
+
 make_choice = lambda l: [(str(m), str(m)) for m in l]
 
 
@@ -90,15 +92,12 @@ class PackageSearchForm(forms.Form):
     pkgbase = forms.MultipleChoiceField(required=False)
     q = forms.CharField(required=False)
     search_files = forms.BooleanField(required=False)
-    maintainer = forms.ChoiceField(required=False)
+    packager = forms.ChoiceField(required=False)
     packager = forms.ChoiceField(required=False)
     last_update = forms.DateField(required=False, widget=AdminDateWidget(),
-            label='Last Updated After')
-    flagged = forms.ChoiceField(
-            choices=[('', 'All')] + make_choice(['Flagged', 'Not Flagged']),
-            required=False)
+            label=_('Last Updated After'))
     limit = LimitTypedChoiceField(
-            choices=make_choice([50, 100, 250]) + [('all', 'All')],
+            choices=make_choice([50, 100, 250]) + [('all', _('All'))],
             coerce=coerce_limit_value,
             required=False,
             initial=50)
@@ -113,11 +112,11 @@ class PackageSearchForm(forms.Form):
                         [pkgbase.name for pkgbase in partOf.objects.all().order_by('name')])
         self.fields['q'].widget.attrs.update({"size": "30"})
         maints = User.objects.filter(is_active=True).order_by('username')
-        self.fields['maintainer'].choices = \
-                [('', 'All')] + \
+        self.fields['packager'].choices = \
+                [('', _('All'))] + \
                 [(m.username, m.username) for m in maints]
         self.fields['packager'].choices = \
-                [('', 'All'), ('unknown', 'Unknown')] + \
+                [('', _('All')),] + \
                 [(m.username, m.username) for m in maints]
 
 
@@ -126,6 +125,7 @@ def search(request, page=None):
     packages = Package.objects.normal()
     search_files = False  # boolean data to specify searching in files to template
 
+    page_dict = {}
     if request.GET:
         form = PackageSearchForm(data=request.GET)
         if form.is_valid():
@@ -135,8 +135,8 @@ def search(request, page=None):
             if form.cleaned_data['arch']:
                 packages = packages.filter(architecture__name__in=form.cleaned_data['arch'])
 
-            if form.cleaned_data['maintainer']:
-                packages = packages.filter(packager__username__contains=form.cleaned_data['maintainer'])
+            if form.cleaned_data['packager']:
+                packages = packages.filter(packager__username__contains=form.cleaned_data['packager'])
 
             if form.cleaned_data['pkgbase']:
                 packages = packages.filter(partOf__name__in=form.cleaned_data['pkgbase'])
@@ -151,6 +151,7 @@ def search(request, page=None):
                 if form.cleaned_data['search_files']:
                     packages = packages.filter(package_files__icontains=query)
                     search_files = True
+                    page_dict['q'] = form.cleaned_data['q']
                 else:
                     desc = Description.objects.filter(desc__icontains=query)  # TODO
                     packages = packages.filter(name__icontains=query)
@@ -166,10 +167,11 @@ def search(request, page=None):
         form = PackageSearchForm()
 
     current_query = request.GET.urlencode()
-    page_dict = {
+    page_dict.update({
             'search_form': form,
             'current_query': current_query
-    }
+    })
+
     allowed_sort = ["architecture", "distribution", "name", "pkgbase",
             "compressed_size", "installed_size",
             "build_date", "last_update", "flag_date"]
