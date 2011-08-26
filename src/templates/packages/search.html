@@ -117,7 +117,7 @@
                         {% if search_files %}
                             {% with files=pkg.package_files|find_files:q %}
                                 {% for file in files %}
-                                /{{ file|safe|escape }}{% if not forloop.last %}<br />{% endif %}
+                                {{ file|safe|escape }}{% if not forloop.last %}<br />{% endif %}
                                 {% endfor %}
                             {% endwith %}
                         {% else %}

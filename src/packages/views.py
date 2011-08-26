@@ -38,6 +38,7 @@ def files(request, name, dist, arch):
     print p.package_files
 
     paths = p.package_files.split('\n')[:-1]
+    paths.sort()
     template = 'packages/files.html'
     context = {'pkg': p,
                'files': paths}
@@ -151,7 +152,7 @@ def search(request, page=None):
                 if form.cleaned_data['search_files']:
                     packages = packages.filter(package_files__icontains=query)
                     search_files = True
-                    page_dict['q'] = form.cleaned_data['q']
+                    page_dict['q'] = form.cleaned_data['q'].lower()
                 else:
                     desc = Description.objects.filter(desc__icontains=query)  # TODO
                     packages = packages.filter(name__icontains=query)

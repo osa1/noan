@@ -53,7 +53,7 @@ msgid "Packages"
 msgstr "Paketler"
 
 #: templates/base.html:20
-msgid "Community wiki"
+msgid "User Wiki"
 msgstr "Wiki"
 
 #: templates/base.html:20

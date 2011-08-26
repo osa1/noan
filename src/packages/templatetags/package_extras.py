@@ -80,7 +80,7 @@ def packager_username(packager):
 @stringfilter
 def find_files(file_list, file_name):
     pattern = re.compile(file_name, re.IGNORECASE)
-    return [pattern.sub(lambda match: '<b>' + match.group(0) + '</b>', f) \
+    return [pattern.sub(lambda match: '<span class="highlight">' + match.group(0) + '</span>', f) \
             for f in file_list.split('\n') if file_name in f.lower()]
 
 

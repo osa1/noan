@@ -152,7 +152,7 @@
                         <th>{% trans "Packager" %}</th>
                         <th>{% trans "Details" %}</th>
                     </tr>
-                    {% for update in pkg.updates %}
+                    {% for update in pkg.updates reversed %}
                     <tr class="{% cycle 'odd' 'even' %}">
                         <td>{{ update.date|date:"Y-m-d" }}</td>
                         <td>{{ update.version }}-{{ update.release }}</td>

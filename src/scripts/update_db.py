@@ -5,7 +5,6 @@ import os
 import sys
 import pisi
 import lzma
-import time
 import urllib2
 import piksemel
 import itertools
@@ -24,17 +23,17 @@ from packages.models import *
 from django.contrib.auth.models import User
 
 
-#BASEURL = "http://packages.pardus.org.tr/pardus/"
-#VERSION = ("2011", "corporate2")
-#REPOS = ("devel", "testing", "stable")
-#ARCHITECTURE = ("i686", "x86_64")
 BASEURL = "http://packages.pardus.org.tr/pardus/"
-VERSION = ("2011",)
-REPOS = ("stable",)
-ARCHITECTURE = ("i686",)
+VERSION = ("2011", "corporate2")
+REPOS = ("devel", "testing", "stable")
+ARCHITECTURE = ("i686", "x86_64")
+
+#BASEURL = "http://packages.pardus.org.tr/pardus/"
+#VERSION = ("2011",)
+#REPOS = ("devel",)
+#ARCHITECTURE = ("i686",)
 
 BASE_CONTENT_FOLDER = '/var/www/localhost/htdocs/pardus/'
-t = time.time()
 
 
 def createAttr(pisi_package, model, attribute):
@@ -144,7 +143,7 @@ def create_package(pisi_package, dist):
     try:
         metadata, files = pisi.api.info_file(filename)
         for fileinfo in files.list:
-            package_files.write(fileinfo.path + '\n')
+            package_files.write('/' + fileinfo.path + '\n')
         package_files.reset()  # cursor'u basa al
         p.package_files = package_files.read()
         p.save()
