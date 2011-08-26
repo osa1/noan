@@ -1,5 +1,6 @@
 # Django settings for packages_pardus project.
 import os
+import sys
 
 DEBUG = True
 #TEMPLATE_DEBUG = DEBUG
@@ -10,6 +11,7 @@ ADMINS = (
 )
 
 DEPLOY_PATH = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(DEPLOY_PATH)
 
 MANAGERS = ADMINS
 
@@ -31,10 +33,10 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago' 
+TIME_ZONE = 'Europe/Istanbul' 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'tr'
+LANGUAGE_CODE = 'en-us'
 
 ugettext = lambda s: s  # https://docs.djangoproject.com/en/1.3/topics/i18n/deployment/
 LANGUAGES = (
@@ -106,10 +108,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    #'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 )
 
-ROOT_URLCONF = 'packages_pardus.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
